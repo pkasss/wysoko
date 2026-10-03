@@ -13,7 +13,6 @@ export const auth = betterAuth({
         provider: "pg",
         schema
     }),
-    baseURL: "http://localhost:3000/",
     plugins: [
         magicLink({
             sendMagicLink: async ({email, url}) => {

@@ -1,0 +1,12 @@
+GET https://wysoko.vercel.app/api/auth/ok
+
+###
+
+POST https://wysoko.vercel.app/api/auth/sign-in/magic-link
+Content-Type: application/json
+Origin: https://wysoko.vercel.app
+
+{
+  "email": "kacper.stoch@icloud.com",
+  "callbackURL": "/"
+}
