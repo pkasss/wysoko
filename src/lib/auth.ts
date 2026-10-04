@@ -4,7 +4,7 @@ import {betterAuth} from "better-auth";
 import * as schema from '../db/auth-schema'
 import {magicLink} from "better-auth/plugins";
 import {drizzleAdapter} from "better-auth/adapters/drizzle";
-import {EmailTemplate} from "@/src/app/components/email-template";
+import {EmailTemplate} from "@/src/components/email-template";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
