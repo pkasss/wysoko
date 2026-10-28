@@ -1,21 +1,33 @@
-'use client';
+import {auth} from "@/src/lib/auth";
 
-import {useState} from "react";
-import {Input} from "@/components/ui/input";
-import {Field} from "@/components/ui/field";
+import {headers} from "next/headers";
+import {redirect} from "next/navigation";
+import {getSafeRedirect} from "@/src/lib/redirects";
+import {UserDataForm} from "@/src/components/UserDataForm";
 
-export default function Welcome() {
-    const [name, setName] = useState('');
+export default async function Welcome({
+    searchParams,
+} : {
+    searchParams: Promise<{next?: string}>;
+}) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
+
+    const {next} = await searchParams;
+    const callbackURL = getSafeRedirect(next);
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (session.user.name) {
+        redirect(callbackURL);
+    }
 
     return (
         <main className="flex min-h-dvh items-center justify-center p-4">
-            <Field className={"w-full max-w-sm"}>
-                <h1 className={"text-2xl"}>Cześć, {name}!</h1>
-                <Input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-            </Field>
+            <UserDataForm callbackURL={callbackURL}/>
         </main>
     )
 }

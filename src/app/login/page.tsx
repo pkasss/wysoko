@@ -1,20 +1,29 @@
-import {redirect} from "next/navigation";
-import {headers} from "next/headers";
 import {auth} from "@/src/lib/auth";
+
+import {headers} from "next/headers";
+import {redirect} from "next/navigation";
+import {getSafeRedirect} from "@/src/lib/redirects";
 import {LoginForm} from "@/src/components/LoginForm";
 
-export default async function Login() {
+export default async function Login({
+    searchParams,
+} : {
+    searchParams: Promise<{next?: string}>;
+}) {
     const session = await auth.api.getSession({
         headers: await headers()
-    })
+    });
+
+    const {next} = await searchParams;
+    const callbackURL = getSafeRedirect(next);
 
     if (session) {
-        redirect("/");
+        redirect(callbackURL);
     }
 
     return (
         <main className="flex min-h-dvh items-center justify-center p-4">
-            <LoginForm/>
+            <LoginForm callbackURL={callbackURL}/>
         </main>
     )
 }

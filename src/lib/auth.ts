@@ -1,8 +1,9 @@
 import {db} from '@/src/db';
 import {Resend} from "resend";
 import {betterAuth} from "better-auth";
-import * as schema from '../db/auth-schema'
+import {username} from "better-auth/plugins";
 import {magicLink} from "better-auth/plugins";
+import * as schema from "@/src/db/auth-schema";
 import {drizzleAdapter} from "better-auth/adapters/drizzle";
 import {EmailTemplate} from "@/src/components/email-template";
 
@@ -23,6 +24,7 @@ export const auth = betterAuth({
                     react: EmailTemplate({ firstName: 'Kacper', url: url }),
                 });
             }
-        })
+        }),
+        username()
     ]
 });

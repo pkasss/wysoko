@@ -44,7 +44,8 @@ async function main() {
         .insert(competition)
         .values({
             name: 'Testowe Zawody',
-            date: '2026-10-01',
+            startDate: '2026-10-03',
+            endDate: '2026-10-06',
             zoneMultiplier: 1,
             topMultiplier: 2,
         })

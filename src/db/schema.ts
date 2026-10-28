@@ -4,7 +4,8 @@ import {user} from './auth-schema';
 export const competition = pgTable('competition', {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     name: varchar().notNull(),
-    date: date().notNull(),
+    startDate: date().notNull(),
+    endDate: date().notNull(),
     zoneMultiplier: integer().notNull(),
     topMultiplier: integer().notNull()
 });
@@ -14,7 +15,7 @@ export const competitor = pgTable('competitor',
         id: integer().primaryKey().generatedAlwaysAsIdentity(),
         token: varchar().unique().notNull(),
         userId: text('user_id')
-            .references(() => user.id)
+            .references(() => user.id, {onDelete: "cascade"})
             .notNull(),
         competitionId: integer('competition_id')
             .references(() => competition.id)
@@ -42,7 +43,7 @@ export const result = pgTable('result',
     {
         id: integer().primaryKey().generatedAlwaysAsIdentity(),
         competitorId: integer('competitor_id')
-            .references(() => competitor.id)
+            .references(() => competitor.id, {onDelete: "cascade"})
             .notNull(),
         boulderId: integer('boulder_id')
             .references(() => boulder.id)

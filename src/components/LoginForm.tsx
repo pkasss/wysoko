@@ -1,20 +1,24 @@
 'use client';
 
-import {SubmitEvent, useState} from "react";
 import {authClient} from "@/src/lib/auth-client";
+import {SubmitEvent, useState} from "react";
 
 import {
     Field,
     FieldDescription,
     FieldLabel,
     FieldError
-} from "@/components/ui/field";
-import {Input} from "@/components/ui/input";
-import {Button} from "@/components/ui/button";
+} from "@/src/components/ui/field";
+import {Input} from "@/src/components/ui/input";
+import {Button} from "@/src/components/ui/button";
 
 type LoginStatus = 'idle' | 'sending' | 'sent' | 'error';
 
-export function LoginForm() {
+export function LoginForm({
+    callbackURL,
+} : {
+    callbackURL: string;
+}) {
     const [mail, setMail] = useState("");
     const [status, setStatus] = useState<LoginStatus>('idle');
 
@@ -25,8 +29,8 @@ export function LoginForm() {
 
         const {error} = await authClient.signIn.magicLink({
             email: mail,
-            callbackURL: "/",
-            newUserCallbackURL: "/welcome",
+            callbackURL,
+            newUserCallbackURL: `/welcome?next=${encodeURIComponent(callbackURL)}`,
             errorCallbackURL: "/error"
         });
 

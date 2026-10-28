@@ -1,4 +1,4 @@
-import {pgTable, text, timestamp, boolean, index} from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),
@@ -11,6 +11,8 @@ export const user = pgTable("user", {
         .defaultNow()
         .$onUpdate(() => /* @__PURE__ */ new Date())
         .notNull(),
+    username: text("username").unique(),
+    displayUsername: text("display_username"),
 });
 
 export const session = pgTable(
@@ -27,7 +29,7 @@ export const session = pgTable(
         userAgent: text("user_agent"),
         userId: text("user_id")
             .notNull()
-            .references(() => user.id, {onDelete: "cascade"}),
+            .references(() => user.id, { onDelete: "cascade" }),
     },
     (table) => [index("session_userId_idx").on(table.userId)],
 );
@@ -40,7 +42,7 @@ export const account = pgTable(
         providerId: text("provider_id").notNull(),
         userId: text("user_id")
             .notNull()
-            .references(() => user.id, {onDelete: "cascade"}),
+            .references(() => user.id, { onDelete: "cascade" }),
         accessToken: text("access_token"),
         refreshToken: text("refresh_token"),
         idToken: text("id_token"),
