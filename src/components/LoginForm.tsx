@@ -15,7 +15,7 @@ import {Button} from "@/src/components/ui/button";
 type LoginStatus = 'idle' | 'sending' | 'sent' | 'error';
 
 export function LoginForm({
-    callbackURL,
+    callbackURL
 } : {
     callbackURL: string;
 }) {

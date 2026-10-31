@@ -16,7 +16,7 @@ export async function getCompetitions() {
 }
 
 export async function getCompetition(competitionId: number) {
-    const [newCompetition] = await db.select({
+    const [row] = await db.select({
         id: competition.id,
         name: competition.name,
         startDate: competition.startDate,
@@ -26,5 +26,5 @@ export async function getCompetition(competitionId: number) {
         .where(eq(competition.id, competitionId))
         .limit(1);
 
-    return newCompetition;
+    return row;
 }

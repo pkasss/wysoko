@@ -3,10 +3,12 @@ import {auth} from "@/src/lib/auth";
 import {Button, buttonVariants} from "@/src/components/ui/button";
 
 import {headers} from "next/headers";
-import {notFound, redirect} from "next/navigation";
+import {getToday} from "@/src/lib/dates";
+import {notFound} from "next/navigation";
+import {BouldersGrid} from "@/src/components/BouldersGrid";
 import {getCompetitor} from "@/src/db/queries/competitors";
 import {getCompetition} from "@/src/db/queries/competitions";
-import {getToday} from "@/src/lib/dates";
+import {getBouldersWithResults} from "@/src/db/queries/boulders";
 
 export default async function Competition({
     params,
@@ -36,8 +38,14 @@ export default async function Competition({
     let joinSection: React.ReactNode;
 
     if (competitor) {
+
+        const boulders = await getBouldersWithResults(competitionId, competitor.id)
+
         joinSection = (
-            <p>jesteś zawodnikiem już.</p>
+            <section>
+                <p>jesteś zawodnikiem już.</p>
+                <BouldersGrid boulders={boulders} />
+            </section>
         )
     } else if (isFinished) {
       joinSection = (

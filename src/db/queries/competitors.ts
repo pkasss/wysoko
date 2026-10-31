@@ -1,18 +1,22 @@
 import "server-only";
 
 import {db} from "@/src/db";
-import {competitor} from "@/src/db/schema";
+import {competitor, heat} from "@/src/db/schema";
 import {and, eq, isNull, sql} from "drizzle-orm";
 
 export async function getCompetitor(userId: string, competitionId: number) {
-    const [newCompetitor] = await db.select({
-        id: competitor.id
+    const [row] = await db.select({
+        id: competitor.id,
+        name: competitor.name,
+        startTime: heat.startTime,
+        endTime: heat.endTime,
     })
         .from(competitor)
+        .innerJoin(heat, eq(competitor.heatId, heat.id))
         .where(and(eq(competitor.userId, userId), eq(competitor.competitionId, competitionId)))
         .limit(1);
 
-    return newCompetitor;
+    return row;
 }
 
 export async function getUnlinkedCompetitors(email:string) {
