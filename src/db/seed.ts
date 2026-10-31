@@ -5,7 +5,7 @@ import {db} from './index';
 import {competition, competitor, heat, boulder, result} from './schema';
 import {user} from './auth-schema';
 
-const MY_EMAIL = 'kacper.stoch@icloud.com';
+const MY_EMAIL = process.env.SEED_MY_EMAIL ?? 'example@mail.com';
 
 const GRADE_DISTRIBUTION: [grade: number, count: number][] = [
     [2, 3],
