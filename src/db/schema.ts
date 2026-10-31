@@ -1,5 +1,8 @@
-import {pgTable, integer, text, date, boolean, varchar, unique} from 'drizzle-orm/pg-core';
-import {user} from './auth-schema';
+import {pgTable, integer, text, date, boolean, varchar, unique, pgEnum, timestamp} from 'drizzle-orm/pg-core';
+import {user} from "@/src/db/auth-schema";
+
+export const sexType = pgEnum('sex_type', ['k', 'm']);
+export const heatType = pgEnum('heat_type', ['qualification', 'harvestFest']);
 
 export const competition = pgTable('competition', {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -13,15 +16,37 @@ export const competition = pgTable('competition', {
 export const competitor = pgTable('competitor',
     {
         id: integer().primaryKey().generatedAlwaysAsIdentity(),
-        token: varchar().unique().notNull(),
-        userId: text('user_id')
-            .references(() => user.id, {onDelete: "cascade"})
+        userId: text()
+            .references(() => user.id, {onDelete: "set null"}),
+        externalId: text().notNull(),
+        email: text().notNull(),
+        name: text().notNull(),
+        sex: sexType().notNull(),
+        birthDate: date().notNull(),
+        heatId: integer()
+            .references(() => heat.id)
             .notNull(),
         competitionId: integer('competition_id')
             .references(() => competition.id)
             .notNull()
     }, (table) => [
-        unique().on(table.userId, table.competitionId)
+        unique().on(table.userId, table.competitionId),
+        unique().on(table.externalId, table.competitionId)
+    ]
+);
+
+export const heat = pgTable('heat',
+    {
+        id: integer().primaryKey().generatedAlwaysAsIdentity(),
+        number: integer(),
+        type: heatType().notNull(),
+        competitionId: integer('competition_id')
+            .references(() => competition.id)
+            .notNull(),
+        startTime: timestamp({withTimezone: true}).notNull(),
+        endTime: timestamp({withTimezone: true}).notNull(),
+    }, (table) => [
+        unique().on(table.number, table.competitionId)
     ]
 );
 
@@ -50,6 +75,8 @@ export const result = pgTable('result',
             .notNull(),
         isZone: boolean().default(false).notNull(),
         isTop: boolean().default(false).notNull(),
+        isFlash: boolean().default(false).notNull(),
+        updatedAt: timestamp({withTimezone: true}).defaultNow().notNull(),
     }, (table) => [
         unique().on(table.competitorId, table.boulderId)
     ]

@@ -30,7 +30,6 @@ export function LoginForm({
         const {error} = await authClient.signIn.magicLink({
             email: mail,
             callbackURL,
-            newUserCallbackURL: `/welcome?next=${encodeURIComponent(callbackURL)}`,
             errorCallbackURL: "/error"
         });
 

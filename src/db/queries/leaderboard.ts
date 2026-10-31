@@ -1,3 +1,5 @@
+import "server-only";
+
 import {desc, eq, lte, sql} from 'drizzle-orm';
 import {db} from '@/src/db'
 import {boulder, competition, result} from '@/src/db/schema';
@@ -5,8 +7,8 @@ import {boulder, competition, result} from '@/src/db/schema';
 const points = sql<number>
     `
             case 
-                when ${result.isTop} = true then ${boulder.number} * ${competition.topMultiplier}   
-                when ${result.isZone} = true then ${boulder.number} * ${competition.zoneMultiplier}
+                when ${result.isTop} = true then ${boulder.grade} * ${competition.topMultiplier}   
+                when ${result.isZone} = true then ${boulder.grade} * ${competition.zoneMultiplier}
                 else 0
             end
         `

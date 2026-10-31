@@ -11,10 +11,6 @@ export default async function Home() {
     });
 
 
-    if (session && !session.user.name) {
-        redirect("/welcome");
-    }
-
     const competitions = await getCompetitions();
     const today = getToday();
 

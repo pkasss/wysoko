@@ -6,7 +6,6 @@ import {headers} from "next/headers";
 import {notFound, redirect} from "next/navigation";
 import {getCompetitor} from "@/src/db/queries/competitors";
 import {getCompetition} from "@/src/db/queries/competitions";
-import {joinCompetition} from "@/src/db/actions/competitors";
 import {getToday} from "@/src/lib/dates";
 
 export default async function Competition({
@@ -17,10 +16,6 @@ export default async function Competition({
     const session = await auth.api.getSession({
         headers: await headers()
     });
-
-    if (session && !session.user.name) {
-        redirect("/welcome");
-    }
 
     const {id} = await params;
     const competitionId = Number(id);
@@ -57,12 +52,9 @@ export default async function Competition({
             </Link>
         );
     } else {
-        const registerToThisEvent = joinCompetition.bind(null, competitionId);
         joinSection = (
-            <form action={registerToThisEvent}>
-                <Button type={"submit"}>zapisz się.</Button>
-            </form>
-        );
+            <p>nie ma cie na liście uczestników.</p>
+        )
     }
 
     return (
