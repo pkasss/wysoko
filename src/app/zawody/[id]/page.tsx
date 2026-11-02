@@ -1,19 +1,20 @@
 import Link from "next/link";
 import {auth} from "@/src/lib/auth";
-import {Button, buttonVariants} from "@/src/components/ui/button";
+import {buttonVariants} from "@/src/components/ui/button";
 
 import {headers} from "next/headers";
 import {getToday} from "@/src/lib/dates";
 import {notFound} from "next/navigation";
 import {BouldersGrid} from "@/src/components/BouldersGrid";
-import {getCompetitor} from "@/src/db/queries/competitors";
+import {getCompetitors} from "@/src/db/queries/competitors";
 import {getCompetition} from "@/src/db/queries/competitions";
 import {getBouldersWithResults} from "@/src/db/queries/boulders";
 
 export default async function Competition({
-    params,
-}: {
-    params: Promise<{ id: string }>
+                                              params, searchParams
+                                          }: {
+    params: Promise<{ id: string }>,
+    searchParams: Promise<{ zawodnik?: string }>
 }) {
     const session = await auth.api.getSession({
         headers: await headers()
@@ -32,7 +33,10 @@ export default async function Competition({
         notFound();
     }
 
-    const competitor = session ? await getCompetitor(session.user.id, competitionId) : undefined;
+    const competitors = session ? await getCompetitors(session.user.id, competitionId) : [];
+    const {zawodnik} = await searchParams;
+    const competitor = competitors.find(c => c.id === Number(zawodnik)) ?? competitors[0];
+
     const isFinished = competition.endDate < getToday();
 
     let joinSection: React.ReactNode;
@@ -44,13 +48,28 @@ export default async function Competition({
         joinSection = (
             <section>
                 <p>jesteś zawodnikiem już.</p>
-                <BouldersGrid boulders={boulders} />
+                {competitors.length > 1 && (
+                    <nav className={'flex gap-2'}>
+                        {competitors.map((c) => (
+                            <Link
+                                key={c.id}
+                                href={`/zawody/${competitionId}?zawodnik=${c.id}`}
+                                className={buttonVariants({
+                                    variant: c.id === competitor.id ? 'default' : 'outline',
+                                })}
+                            >
+                                {c.name.split(' ')[0]}
+                            </Link>
+                        ))}
+                    </nav>
+                )}
+                <BouldersGrid key={competitor.id} boulders={boulders} competitorId={competitor.id} />
             </section>
         )
     } else if (isFinished) {
-      joinSection = (
-          <p>zapisy zakończone.</p>
-      )
+        joinSection = (
+            <p>zapisy zakończone.</p>
+        )
     } else if (!session) {
         joinSection = (
             <Link

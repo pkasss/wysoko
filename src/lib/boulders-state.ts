@@ -8,6 +8,14 @@ export type BoulderStatus = (typeof BOULDER_STATUSES)[number];
 
 export type SaveResultCode = 'invalid' | 'unauthorized' | 'not_found' | 'not_competitor' | 'not_started' | 'closed';
 export type SaveResultResponse = | {ok: true} | {ok: false, reason: SaveResultCode};
+export const saveResultResponseMessage: Record<SaveResultCode, string> = {
+    invalid: 'coś poszło nie tak.',
+    unauthorized: 'zaloguj się ponownie.',
+    not_found: 'coś poszło nie tak.',
+    not_competitor: 'nie startujesz w tych zawodach.',
+    not_started: 'grupa jeszcze nie wystartowała.',
+    closed: 'minęło 20 minut od końca grupy.'
+}
 
 export const statusFlags: Record<BoulderStatus, {isZone: boolean, isTop: boolean, isFlash: boolean}> = {
     'none': {isZone: false, isTop: false, isFlash: false},

@@ -5,7 +5,7 @@ import {db} from './index';
 import {competition, competitor, heat, boulder, result} from './schema';
 import {user} from './auth-schema';
 
-const MY_EMAIL = process.env.SEED_MY_EMAIL ?? 'example@mail.com';
+const MY_EMAIL = (process.env.SEED_MY_EMAIL ?? 'twoj-mail@example.com').trim().toLowerCase();
 
 const GRADE_DISTRIBUTION: [grade: number, count: number][] = [
     [2, 3],
@@ -18,11 +18,26 @@ const GRADE_DISTRIBUTION: [grade: number, count: number][] = [
     [9, 4],
 ];
 
+const REAL_HEATS: [number: number, day: string, start: string, end: string][] = [
+    [1, '2026-11-20', '08:00', '10:45'],
+    [2, '2026-11-20', '11:00', '13:45'],
+    [3, '2026-11-20', '14:15', '17:00'],
+    [4, '2026-11-20', '17:15', '20:00'],
+    [5, '2026-11-20', '20:30', '23:15'],
+    [6, '2026-11-21', '08:00', '10:45'],
+    [7, '2026-11-21', '11:00', '13:45'],
+    [8, '2026-11-21', '14:15', '17:00'],
+    [9, '2026-11-21', '17:15', '20:00'],
+    [10, '2026-11-21', '20:30', '23:15'],
+];
+
+const HARVEST_FEST: [day: string, start: string, end: string] = ['2026-11-22', '09:00', '12:00'];
+
 const HOUR = 60 * 60 * 1000;
-const HEAT_LENGTH = 2.75 * HOUR;
+const TEST_HEAT_LENGTH = 2.75 * HOUR;
 const LINKED_COUNT = 10;
 
-const people: [name: string, sex: 'k' | 'm'][] = [
+const people: [name: string, gender: 'k' | 'm'][] = [
     ['Anna Nowak', 'k'], ['Kuba Kowalski', 'm'], ['Ola Wiśniewska', 'k'], ['Michał Wójcik', 'm'],
     ['Zosia Kamińska', 'k'], ['Bartek Lewandowski', 'm'], ['Kasia Zielińska', 'k'], ['Tomek Szymański', 'm'],
     ['Marta Woźniak', 'k'], ['Paweł Dąbrowski', 'm'], ['Julia Kozłowska', 'k'], ['Adam Jankowski', 'm'],
@@ -32,10 +47,14 @@ const people: [name: string, sex: 'k' | 'm'][] = [
     ['Ala Olszewska', 'k'], ['Filip Stępień', 'm'], ['Hania Malinowska', 'k'], ['Marcin Jaworski', 'm'],
 ];
 
-const familyMembers: [name: string, sex: 'k' | 'm', birthDate: string][] = [
-    ['Lena Rodzic', 'k', '2015-04-12'],
-    ['Staś Rodzic', 'm', '2017-09-03'],
+const familyMembers: [name: string, gender: 'k' | 'm', birthDate: string][] = [
+    ['Lena Testowa', 'k', '2015-04-12'],
+    ['Staś Testowy', 'm', '2017-09-03'],
 ];
+
+const warsawTime = (day: string, time: string) => new Date(`${day}T${time}:00+01:00`);
+
+const toDateString = (date: Date) => date.toLocaleDateString('en-CA', {timeZone: 'Europe/Warsaw'});
 
 const shuffle = <T, >(items: T[]) => {
     const copy = [...items];
@@ -45,8 +64,6 @@ const shuffle = <T, >(items: T[]) => {
     }
     return copy;
 };
-
-const toDateString = (date: Date) => date.toLocaleDateString('en-CA', {timeZone: 'Europe/Warsaw'});
 
 const randomBirthDate = () => {
     const year = 1980 + Math.floor(Math.random() * 30);
@@ -58,14 +75,55 @@ const randomBirthDate = () => {
 const randomTimeBetween = (from: Date, to: Date) =>
     new Date(from.getTime() + Math.random() * (to.getTime() - from.getTime()));
 
-async function main() {
-    await db.execute(
-        sql`truncate table result, competitor, heat, boulder, competition, session, account, verification, "user" restart identity`,
-    );
+const grades = GRADE_DISTRIBUTION.flatMap(([grade, count]) => Array<number>(count).fill(grade));
 
+const insertBoulders = (competitionId: number) =>
+    db
+        .insert(boulder)
+        .values(grades.map((grade, i) => ({number: i + 1, grade, competitionId})))
+        .returning();
+
+async function seedRealCompetition() {
+    const [krakemAll] = await db
+        .insert(competition)
+        .values({
+            name: "KRAK'EM ALL 2026",
+            startDate: '2026-11-20',
+            endDate: '2026-11-22',
+            zoneMultiplier: 3,
+            topMultiplier: 4,
+        })
+        .returning();
+
+    const insertedHeats = await db
+        .insert(heat)
+        .values([
+            ...REAL_HEATS.map(([number, day, start, end]) => ({
+                number,
+                type: 'qualification' as const,
+                competitionId: krakemAll.id,
+                startTime: warsawTime(day, start),
+                endTime: warsawTime(day, end),
+            })),
+            {
+                number: null,
+                type: 'harvestFest' as const,
+                competitionId: krakemAll.id,
+                startTime: warsawTime(HARVEST_FEST[0], HARVEST_FEST[1]),
+                endTime: warsawTime(HARVEST_FEST[0], HARVEST_FEST[2]),
+            },
+        ])
+        .returning();
+
+    await insertBoulders(krakemAll.id);
+
+    return {krakemAll, insertedHeats};
+}
+
+async function seedTestCompetition() {
     const now = new Date();
 
-    const [ongoing] = await db
+    const [testCompetition] = await db
         .insert(competition)
         .values({
             name: 'Testowe Zawody',
@@ -76,30 +134,37 @@ async function main() {
         })
         .returning();
 
-    await db.insert(competition).values({
-        name: 'Zeszłoroczne Zawody',
-        startDate: toDateString(new Date(now.getTime() - 365 * 24 * HOUR)),
-        endDate: toDateString(new Date(now.getTime() - 363 * 24 * HOUR)),
-        zoneMultiplier: 3,
-        topMultiplier: 4,
-    });
-
-    const heatStarts = [-6, -3, -1, 2].map((hours) => new Date(now.getTime() + hours * HOUR));
-
     const insertedHeats = await db
         .insert(heat)
         .values([
-            ...heatStarts.map((start, i) => ({
-                number: i + 1,
+            ...[-9, -6].map((hours, i) => {
+                const start = new Date(now.getTime() + hours * HOUR);
+                return {
+                    number: i + 1,
+                    type: 'qualification' as const,
+                    competitionId: testCompetition.id,
+                    startTime: start,
+                    endTime: new Date(start.getTime() + TEST_HEAT_LENGTH),
+                };
+            }),
+            {
+                number: 3,
                 type: 'qualification' as const,
-                competitionId: ongoing.id,
-                startTime: start,
-                endTime: new Date(start.getTime() + HEAT_LENGTH),
-            })),
+                competitionId: testCompetition.id,
+                startTime: new Date(now.getTime() - HOUR),
+                endTime: new Date(now.getTime() + 12 * HOUR),
+            },
+            {
+                number: 4,
+                type: 'qualification' as const,
+                competitionId: testCompetition.id,
+                startTime: new Date(now.getTime() + 14 * HOUR),
+                endTime: new Date(now.getTime() + 14 * HOUR + TEST_HEAT_LENGTH),
+            },
             {
                 number: null,
                 type: 'harvestFest' as const,
-                competitionId: ongoing.id,
+                competitionId: testCompetition.id,
                 startTime: new Date(now.getTime() + 20 * HOUR),
                 endTime: new Date(now.getTime() + 23 * HOUR),
             },
@@ -108,19 +173,7 @@ async function main() {
 
     const qualificationHeats = insertedHeats.filter((h) => h.type === 'qualification');
     const currentHeat = qualificationHeats.find((h) => h.startTime <= now && now <= h.endTime)!;
-
-    const grades = GRADE_DISTRIBUTION.flatMap(([grade, count]) => Array<number>(count).fill(grade));
-
-    const insertedBoulders = await db
-        .insert(boulder)
-        .values(
-            grades.map((grade, i) => ({
-                number: i + 1,
-                grade,
-                competitionId: ongoing.id,
-            })),
-        )
-        .returning();
+    const insertedBoulders = await insertBoulders(testCompetition.id);
 
     const linkedUsers = await db
         .insert(user)
@@ -133,45 +186,49 @@ async function main() {
         )
         .returning();
 
-    const competitorRows = [
-        ...people.map(([name, sex], i) => ({
-            userId: linkedUsers[i]?.id ?? null,
-            externalId: String(1001 + i),
-            email: `zawodnik${i + 1}@example.com`,
-            name,
-            sex,
-            birthDate: randomBirthDate(),
-            heatId: qualificationHeats[i % qualificationHeats.length].id,
-            competitionId: ongoing.id,
-        })),
-        ...familyMembers.map(([name, sex, birthDate], i) => ({
-            userId: null,
-            externalId: String(2001 + i),
-            email: 'rodzic@example.com',
-            name,
-            sex,
-            birthDate,
-            heatId: qualificationHeats[0].id,
-            competitionId: ongoing.id,
-        })),
-        {
-            userId: null,
-            externalId: '3001',
-            email: MY_EMAIL,
-            name: 'Testowy Ja',
-            sex: 'm' as const,
-            birthDate: '1999-01-01',
-            heatId: currentHeat.id,
-            competitionId: ongoing.id,
-        },
-    ];
-
-    const insertedCompetitors = await db.insert(competitor).values(competitorRows).returning();
+    const insertedCompetitors = await db
+        .insert(competitor)
+        .values([
+            ...people.map(([name, gender], i) => ({
+                userId: linkedUsers[i]?.id ?? null,
+                externalId: String(1001 + i),
+                email: `zawodnik${i + 1}@example.com`,
+                name,
+                gender,
+                category: 'adult' as const,
+                birthDate: randomBirthDate(),
+                heatId: qualificationHeats[i % qualificationHeats.length].id,
+                competitionId: testCompetition.id,
+            })),
+            ...familyMembers.map(([name, gender, birthDate], i) => ({
+                userId: null,
+                externalId: String(2001 + i),
+                email: MY_EMAIL,
+                name,
+                gender,
+                category: 'kids' as const,
+                birthDate,
+                heatId: currentHeat.id,
+                competitionId: testCompetition.id,
+            })),
+            {
+                userId: null,
+                externalId: '3001',
+                email: MY_EMAIL,
+                name: 'Testowy Ja',
+                gender: 'm' as const,
+                category: 'adult' as const,
+                birthDate: '1999-01-01',
+                heatId: currentHeat.id,
+                competitionId: testCompetition.id,
+            },
+        ])
+        .returning();
 
     const heatById = new Map(insertedHeats.map((h) => [h.id, h]));
 
     const resultRows = insertedCompetitors
-        .filter((c) => c.email !== MY_EMAIL)
+        .filter((c) => c.externalId !== '3001' && c.externalId !== '2002')
         .flatMap((c) => {
             const competitorHeat = heatById.get(c.heatId)!;
 
@@ -180,7 +237,7 @@ async function main() {
             }
 
             const windowEnd = competitorHeat.endTime < now ? competitorHeat.endTime : now;
-            const elapsed = (windowEnd.getTime() - competitorHeat.startTime.getTime()) / HEAT_LENGTH;
+            const elapsed = Math.min(1, (windowEnd.getTime() - competitorHeat.startTime.getTime()) / TEST_HEAT_LENGTH);
             const skill = Math.random();
             const count = Math.round((10 + Math.random() * 35) * elapsed);
 
@@ -207,17 +264,33 @@ async function main() {
         await db.insert(result).values(resultRows);
     }
 
-    const maxScore = 4 * [...grades].sort((a, b) => b - a).slice(0, 20).reduce((sum, g) => sum + g, 0);
+    return {testCompetition, insertedHeats, currentHeat, insertedCompetitors, resultRows};
+}
+
+async function main() {
+    await db.execute(
+        sql`truncate table result, competitor, heat, boulder, competition, session, account, verification, "user" restart identity`,
+    );
+
     const formatTime = (date: Date) => date.toLocaleString('pl-PL', {timeZone: 'Europe/Warsaw'});
 
-    console.log(`Trwające: ${ongoing.name} (id ${ongoing.id}), ${ongoing.startDate} – ${ongoing.endDate}`);
-    console.log('Grupy:');
-    insertedHeats.forEach((h) =>
-        console.log(`  ${h.number ?? 'Dożynkowa'}: ${formatTime(h.startTime)} – ${formatTime(h.endTime)}${h.id === currentHeat.id ? '  ← trwa teraz' : ''}`),
+    const real = await seedRealCompetition();
+    const test = await seedTestCompetition();
+
+    console.log(`${real.krakemAll.name} (id ${real.krakemAll.id}) – bez zawodników, do testowania importu`);
+    real.insertedHeats.forEach((h) =>
+        console.log(`  grupa ${h.number ?? 'Dożynkowa'}: ${formatTime(h.startTime)} – ${formatTime(h.endTime)}`),
     );
-    console.log(`Bouldery: ${insertedBoulders.length}, zawodnicy: ${insertedCompetitors.length} (połączonych z kontem: ${LINKED_COUNT}), wyniki: ${resultRows.length}`);
-    console.log(`Maksymalny możliwy wynik: ${maxScore}`);
-    console.log(`Twój testowy zawodnik: ${MY_EMAIL}, grupa ${currentHeat.number}`);
+
+    console.log(`\n${test.testCompetition.name} (id ${test.testCompetition.id}) – do testowania siatki`);
+    test.insertedHeats.forEach((h) =>
+        console.log(`  grupa ${h.number ?? 'Dożynkowa'}: ${formatTime(h.startTime)} – ${formatTime(h.endTime)}${h.id === test.currentHeat.id ? '  ← trwa teraz' : ''}`),
+    );
+    console.log(`  zawodnicy: ${test.insertedCompetitors.length} (połączonych z kontem: ${LINKED_COUNT}), wyniki: ${test.resultRows.length}`);
+    console.log(`  na Twoim mailu (${MY_EMAIL}), grupa ${test.currentHeat.number}:`);
+    console.log('    Testowy Ja (adult, bez wyników)');
+    console.log('    Lena Testowa (kids, z wynikami)');
+    console.log('    Staś Testowy (kids, bez wyników)');
 }
 
 main()

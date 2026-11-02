@@ -13,12 +13,11 @@ import {and, eq} from "drizzle-orm";
 
 const RESULT_ENTRY_TIME_MS = 20 * 60 * 1000;
 
-export async function saveResult(boulderId: number, boulderStatus: string): Promise<SaveResultResponse> {
-    if (!Number.isInteger(boulderId)) {
-        return {ok: false, reason: 'invalid'};
-    }
+type SaveResultParams = {competitorId: number, boulderId: number, boulderStatus: string}
 
-    if (!isBoulderStatus(boulderStatus)) {
+export async function saveResult(
+    {competitorId, boulderId, boulderStatus}: SaveResultParams): Promise<SaveResultResponse> {
+    if (!Number.isInteger(competitorId) || !Number.isInteger(boulderId) || !isBoulderStatus(boulderStatus)) {
         return {ok: false, reason: 'invalid'};
     }
 
@@ -34,7 +33,10 @@ export async function saveResult(boulderId: number, boulderStatus: string): Prom
         return {ok: false, reason: 'not_found'};
     }
 
-    const competitor = await getCompetitor(session.user.id, boulder.competitionId);
+
+    const competitor = await getCompetitor(
+        {competitorId, userId: session.user.id, competitionId: boulder.competitionId}
+    );
     if (!competitor) {
         return {ok: false, reason: 'not_competitor'};
     }
@@ -48,7 +50,6 @@ export async function saveResult(boulderId: number, boulderStatus: string): Prom
     } else if (now > closingTime) {
         return {ok: false, reason: 'closed'};
     }
-
 
     if (boulderStatus === 'none') {
         await db.delete(result).where(and(

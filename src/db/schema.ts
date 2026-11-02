@@ -1,7 +1,8 @@
 import {pgTable, integer, text, date, boolean, varchar, unique, pgEnum, timestamp} from 'drizzle-orm/pg-core';
 import {user} from "@/src/db/auth-schema";
 
-export const sexType = pgEnum('sex_type', ['k', 'm']);
+export const genderType = pgEnum('sex_type', ['k', 'm']);
+export const categoryType = pgEnum('category_type', ['adult', 'kids']);
 export const heatType = pgEnum('heat_type', ['qualification', 'harvestFest']);
 
 export const competition = pgTable('competition', {
@@ -21,7 +22,8 @@ export const competitor = pgTable('competitor',
         externalId: text().notNull(),
         email: text().notNull(),
         name: text().notNull(),
-        sex: sexType().notNull(),
+        gender: genderType().notNull(),
+        category: categoryType().notNull(),
         birthDate: date().notNull(),
         heatId: integer()
             .references(() => heat.id)
@@ -30,7 +32,6 @@ export const competitor = pgTable('competitor',
             .references(() => competition.id)
             .notNull()
     }, (table) => [
-        unique().on(table.userId, table.competitionId),
         unique().on(table.externalId, table.competitionId)
     ]
 );
