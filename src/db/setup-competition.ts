@@ -5,6 +5,7 @@ import {boulder, competition, heat} from './schema';
 
 const COMPETITION = {
     name: "KRAK'EM ALL 2026",
+    slug: 'krak-em-all-2026',
     startDate: '2026-11-20',
     endDate: '2026-11-22',
     zoneMultiplier: 3,

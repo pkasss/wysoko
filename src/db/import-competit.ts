@@ -43,11 +43,7 @@ async function main() {
     }
 
     const importData = fs.readFileSync(args[0], "utf-8");
-    const competitionId = Number(args[1]);
-
-    if (!Number.isInteger(competitionId)) {
-        throw new Error('Nie podano ID zawodów.')
-    }
+    const slug = args[1];
 
     const lines = importData
         .split(/\r?\n/)
@@ -75,12 +71,12 @@ async function main() {
         throw new Error(`Brak uczestników z opłaconym startem.`)
     }
 
-    const competition = await getCompetition(competitionId);
+    const competition = await getCompetition(slug);
     if (!competition) {
-        throw new Error(`Nie znaleziono zawodów o ID: ${competitionId}`);
+        throw new Error(`Nie znaleziono zawodów o slug: ${slug}`);
     }
 
-    const heats = await getAllHeats(competitionId);
+    const heats = await getAllHeats(competition.id);
     const heatsMap = new Map<number, number>();
 
     for (const heat of heats) {
@@ -133,7 +129,7 @@ async function main() {
             category,
             birthDate,
             heatId,
-            competitionId
+            competitionId: competition.id
         }
     });
 
