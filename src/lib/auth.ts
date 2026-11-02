@@ -38,13 +38,18 @@ export const auth = betterAuth({
     plugins: [
         magicLink({
             sendMagicLink: async ({email, url}) => {
-                await resend.emails.send({
-                    from: 'Test <onboarding@resend.dev>',
+                const {error} = await resend.emails.send({
+                    from: 'KRAK\'EM ALL <zawody@app.myavatar.pl>',
                     to: email,
-                    subject: 'Hello world',
-                    react: EmailTemplate({ firstName: 'Kacper', url: url }),
+                    subject: 'Twój link do logowania - KRAK\'EM ALL',
+                    react: EmailTemplate({url}),
                 });
-            }
+                if (error) {
+                    console.error(error);
+                    throw new Error(`Nie udało się wysłać miala: ${error.message}`);
+                }
+            },
+            expiresIn: 900
         })
     ]
 });
