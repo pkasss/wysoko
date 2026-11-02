@@ -1,16 +1,18 @@
 import "server-only";
 
 import {db} from "@/src/db";
-import {boulder, result} from "@/src/db/schema";
+import {boulder, competition, result} from "@/src/db/schema";
 
 import {eq, and} from "drizzle-orm";
 
 export async function getBoulder(boulderId: number) {
     const [row] = await db.select({
         id: boulder.id,
-        competitionId: boulder.competitionId
+        competitionId: boulder.competitionId,
+        competitionSlug: competition.slug
     })
         .from(boulder)
+        .leftJoin(competition, eq(boulder.competitionId, competition.id))
         .where(eq(boulder.id, boulderId))
         .limit(1)
 

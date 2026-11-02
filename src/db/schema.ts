@@ -1,4 +1,4 @@
-import {pgTable, integer, text, date, boolean, varchar, unique, pgEnum, timestamp} from 'drizzle-orm/pg-core';
+import {pgTable, integer, text, date, boolean, unique, pgEnum, timestamp} from 'drizzle-orm/pg-core';
 import {user} from "@/src/db/auth-schema";
 
 export const genderType = pgEnum('sex_type', ['k', 'm']);
@@ -7,7 +7,8 @@ export const heatType = pgEnum('heat_type', ['qualification', 'harvestFest']);
 
 export const competition = pgTable('competition', {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    name: varchar().notNull(),
+    name: text().notNull(),
+    slug: text().notNull(),
     startDate: date().notNull(),
     endDate: date().notNull(),
     zoneMultiplier: integer().notNull(),

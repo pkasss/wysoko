@@ -33,7 +33,6 @@ export async function saveResult(
         return {ok: false, reason: 'not_found'};
     }
 
-
     const competitor = await getCompetitor(
         {competitorId, userId: session.user.id, competitionId: boulder.competitionId}
     );
@@ -74,7 +73,7 @@ export async function saveResult(
             })
     }
 
-    revalidatePath(`/zawody/${boulder.competitionId}`)
+    revalidatePath(`/zawody/${boulder.competitionSlug}`)
 
     return {ok: true}
 }

@@ -88,6 +88,7 @@ async function seedRealCompetition() {
         .insert(competition)
         .values({
             name: "KRAK'EM ALL 2026",
+            slug: 'krak-em-all-2026',
             startDate: '2026-11-20',
             endDate: '2026-11-22',
             zoneMultiplier: 3,
@@ -127,6 +128,7 @@ async function seedTestCompetition() {
         .insert(competition)
         .values({
             name: 'Testowe Zawody',
+            slug: 'testowe-zawody',
             startDate: toDateString(new Date(now.getTime() - 24 * HOUR)),
             endDate: toDateString(new Date(now.getTime() + 24 * HOUR)),
             zoneMultiplier: 3,

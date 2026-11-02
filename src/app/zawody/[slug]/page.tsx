@@ -13,27 +13,21 @@ import {getBouldersWithResults} from "@/src/db/queries/boulders";
 export default async function Competition({
                                               params, searchParams
                                           }: {
-    params: Promise<{ id: string }>,
+    params: Promise<{ slug: string }>,
     searchParams: Promise<{ zawodnik?: string }>
 }) {
     const session = await auth.api.getSession({
         headers: await headers()
     });
 
-    const {id} = await params;
-    const competitionId = Number(id);
+    const {slug} = await params;
 
-    if (!Number.isInteger(competitionId)) {
-        notFound();
-    }
-
-    const competition = await getCompetition(competitionId);
-
+    const competition = await getCompetition(slug);
     if (!competition) {
         notFound();
     }
 
-    const competitors = session ? await getCompetitors(session.user.id, competitionId) : [];
+    const competitors = session ? await getCompetitors(session.user.id, competition.id) : [];
     const {zawodnik} = await searchParams;
     const competitor = competitors.find(c => c.id === Number(zawodnik)) ?? competitors[0];
 
@@ -43,7 +37,7 @@ export default async function Competition({
 
     if (competitor) {
 
-        const boulders = await getBouldersWithResults(competitionId, competitor.id)
+        const boulders = await getBouldersWithResults(competition.id, competitor.id)
 
         joinSection = (
             <section>
@@ -53,7 +47,7 @@ export default async function Competition({
                         {competitors.map((c) => (
                             <Link
                                 key={c.id}
-                                href={`/zawody/${competitionId}?zawodnik=${c.id}`}
+                                href={`/zawody/${competition.slug}?zawodnik=${c.id}`}
                                 className={buttonVariants({
                                     variant: c.id === competitor.id ? 'default' : 'outline',
                                 })}
@@ -73,7 +67,7 @@ export default async function Competition({
     } else if (!session) {
         joinSection = (
             <Link
-                href={`/login?next=/zawody/${competitionId}`}
+                href={`/login?next=/zawody/${competition.slug}`}
                 className={buttonVariants({variant: "outline"})}>
                 zaloguj się, żeby wystartować.
             </Link>

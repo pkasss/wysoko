@@ -15,15 +15,16 @@ export async function getCompetitions() {
         .orderBy(desc(competition.startDate));
 }
 
-export async function getCompetition(competitionId: number) {
+export async function getCompetition(slug: string) {
     const [row] = await db.select({
         id: competition.id,
         name: competition.name,
+        slug: competition.slug,
         startDate: competition.startDate,
         endDate: competition.endDate
     })
         .from(competition)
-        .where(eq(competition.id, competitionId))
+        .where(eq(competition.slug, slug))
         .limit(1);
 
     return row;
