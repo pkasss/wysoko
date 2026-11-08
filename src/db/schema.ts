@@ -1,9 +1,12 @@
 import {pgTable, integer, text, date, boolean, unique, pgEnum, timestamp} from 'drizzle-orm/pg-core';
 import {user} from "@/src/db/auth-schema";
 
-export const genderType = pgEnum('sex_type', ['k', 'm']);
 export const categoryType = pgEnum('category_type', ['adult', 'kids']);
+export const genderType = pgEnum('sex_type', ['k', 'm']);
 export const heatType = pgEnum('heat_type', ['qualification', 'harvestFest']);
+
+export type Category = (typeof categoryType.enumValues)[number];
+export type Gender = (typeof genderType.enumValues)[number];
 
 export const competition = pgTable('competition', {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),

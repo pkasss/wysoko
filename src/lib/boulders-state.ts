@@ -4,7 +4,7 @@ export type Boulders = Awaited<ReturnType<typeof getBouldersWithResults>>;
 export type Boulder = Boulders[number];
 
 export const BOULDER_STATUSES = ['none', 'zone', 'top', 'flash'] as const;
-export type BoulderStatus = (typeof BOULDER_STATUSES)[number];
+export type BoulderStatus = typeof BOULDER_STATUSES[number];
 
 export type SaveResultCode = 'invalid' | 'unauthorized' | 'not_found' | 'not_competitor' | 'not_started' | 'closed';
 export type SaveResultResponse = | {ok: true} | {ok: false, reason: SaveResultCode};
