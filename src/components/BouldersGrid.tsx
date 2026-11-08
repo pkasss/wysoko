@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from "react";
+import {useOptimistic, useState, useTransition} from "react";
 import {
     type Boulder,
     type Boulders,
@@ -8,7 +8,7 @@ import {
     type SaveResultCode,
     getBoulderStatus,
     getNextStatus,
-    saveResultResponseMessage
+    saveResultResponseMessage, statusFlags
 } from "@/src/lib/boulders-state";
 import {saveResult} from "@/src/db/actions/results";
 
@@ -26,19 +26,33 @@ export function BouldersGrid({
     competitorId: number;
 }) {
     const [errorCode, setErrorCode] = useState<SaveResultCode | null>(null)
+    const [optimisticBoulders, setOptimisticBoulder] = useOptimistic(
+        boulders,
+        (current, changed: {boulderId: number; status: BoulderStatus}) => {
+            return current.map((boulder) =>
+                boulder.id === changed.boulderId ? {...boulder, ...statusFlags[changed.status]} : boulder,
+            );
+        },
+    );
+    const [, startTransition] = useTransition();
 
-    async function handleClick(boulder: Boulder) {
-        const nextStatus = getNextStatus(getBoulderStatus(boulder));
+    function handleClick(boulder: Boulder) {
+        startTransition(async () => {
+            const nextStatus = getNextStatus(getBoulderStatus(boulder));
 
-        const response = await saveResult({competitorId, boulderId: boulder.id, boulderStatus: nextStatus});
-        setErrorCode(response.ok ? null : response.reason);
+            setOptimisticBoulder({boulderId: boulder.id, status: nextStatus});
+
+            const response = await saveResult({competitorId, boulderId: boulder.id, boulderStatus: nextStatus});
+            setErrorCode(response.ok ? null : response.reason);
+        });
     }
 
+    console.log('render', optimisticBoulders.filter((b) => b.isZone).length);
     return (
         <section>
             {errorCode && <p>{saveResultResponseMessage[errorCode]}</p>}
             <div className={"grid grid-cols-5 gap-2"}>
-                {boulders.map((boulder) => (
+                {optimisticBoulders.map((boulder) => (
                     <button
                         key={boulder.id}
                         type="button"

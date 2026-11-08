@@ -6,6 +6,8 @@ import {redirect} from "next/navigation";
 import {getCompetitions} from "@/src/db/queries/competitions";
 
 export default async function Home() {
+    redirect('/zawody/krak-em-all-2026');
+
     const session = await auth.api.getSession({
         headers: await headers()
     });
