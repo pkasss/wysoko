@@ -85,7 +85,13 @@ export default async function Competition({
                         ))}
                     </nav>
                 )}
-                <BouldersGrid key={competitor.id} boulders={boulders} competitorId={competitor.id} />
+                <BouldersGrid
+                    key={competitor.id}
+                    boulders={boulders}
+                    competitorId={competitor.id}
+                    heatStartTime={competitor.startTime}
+                    heatEndTime={competitor.endTime}
+                />
             </section>
         )
     } else if (isFinished) {

@@ -5,3 +5,5 @@ export function getToday() {
     );
 }
 
+export const formatTime = (date: Date) =>
+    date.toLocaleTimeString('pl-PL', {hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw'});
