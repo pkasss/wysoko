@@ -24,6 +24,9 @@ export const statusFlags: Record<BoulderStatus, {isZone: boolean, isTop: boolean
     'flash': {isZone: true, isTop: true, isFlash: true}
 }
 
+export const RESULT_ENTRY_MINUTES = 20;
+export const CLOSING_TIME = RESULT_ENTRY_MINUTES * 60 * 1000;
+
 export function getBoulderStatus(boulder: Boulder): BoulderStatus {
     if (boulder.isFlash) return 'flash';
     if (boulder.isTop) return 'top';

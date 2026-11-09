@@ -4,14 +4,18 @@ import {result} from "@/src/db/schema";
 import {auth} from "@/src/lib/auth";
 import {db} from "@/src/db";
 
-import {isBoulderStatus, SaveResultResponse, statusFlags} from "@/src/lib/boulders-state";
+import {
+    CLOSING_TIME,
+    isBoulderStatus,
+    RESULT_ENTRY_MINUTES,
+    SaveResultResponse,
+    statusFlags
+} from "@/src/lib/boulders-state";
 import {getCompetitor} from "@/src/db/queries/competitors";
 import {getBoulder} from "@/src/db/queries/boulders";
 import {revalidatePath} from "next/cache";
 import {headers} from "next/headers";
 import {and, eq} from "drizzle-orm";
-
-const RESULT_ENTRY_TIME_MS = 20 * 60 * 1000;
 
 type SaveResultParams = {competitorId: number, boulderId: number, boulderStatus: string}
 
@@ -42,7 +46,7 @@ export async function saveResult(
 
     const now = new Date().getTime();
 
-    const closingTime = competitor.endTime.getTime() + RESULT_ENTRY_TIME_MS;
+    const closingTime = competitor.endTime.getTime() + CLOSING_TIME;
 
     if (now < competitor.startTime.getTime()) {
         return {ok: false, reason: 'not_started'};
