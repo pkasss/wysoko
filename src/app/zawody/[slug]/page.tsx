@@ -5,6 +5,7 @@ import {buttonVariants} from "@/src/components/ui/button";
 import {headers} from "next/headers";
 import {getToday} from "@/src/lib/dates";
 import {notFound} from "next/navigation";
+import {Panel} from "@/src/components/Panel";
 import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {BouldersGrid} from "@/src/components/BouldersGrid";
 import {getCompetitors} from "@/src/db/queries/competitors";
@@ -68,31 +69,34 @@ export default async function Competition({
         const boulders = await getBouldersWithResults(competition.id, competitor.id)
 
         joinSection = (
-            <section>
-                <p>jesteś zawodnikiem już.</p>
-                {competitors.length > 1 && (
-                    <nav className={'flex gap-2'}>
-                        {competitors.map((c) => (
-                            <Link
-                                key={c.id}
-                                href={competitionHref(slug, {competitorId: c.id, leaderboard: leaderboardType})}
-                                className={buttonVariants({
-                                    variant: c.id === competitor.id ? 'default' : 'outline',
-                                })}
-                            >
-                                {c.name.split(' ')[0]}
-                            </Link>
-                        ))}
-                    </nav>
-                )}
-                <BouldersGrid
-                    key={competitor.id}
-                    boulders={boulders}
-                    competitorId={competitor.id}
-                    heatStartTime={competitor.startTime}
-                    heatEndTime={competitor.endTime}
-                />
-            </section>
+            <>
+                <Panel>
+                    {competitors.length > 1 && (
+                        <nav className={'flex gap-2'}>
+                            {competitors.map((c) => (
+                                <Link
+                                    key={c.id}
+                                    href={competitionHref(slug, {competitorId: c.id, leaderboard: leaderboardType})}
+                                    className={buttonVariants({
+                                        variant: c.id === competitor.id ? 'default' : 'outline',
+                                    })}
+                                >
+                                    {c.name.split(' ')[0]}
+                                </Link>
+                            ))}
+                        </nav>
+                    )}
+                </Panel>
+                <Panel>
+                    <BouldersGrid
+                        key={competitor.id}
+                        boulders={boulders}
+                        competitorId={competitor.id}
+                        heatStartTime={competitor.startTime}
+                        heatEndTime={competitor.endTime}
+                    />
+                </Panel>
+            </>
         )
     } else if (isFinished) {
         joinSection = (
@@ -113,7 +117,7 @@ export default async function Competition({
     }
 
     return (
-        <main>
+        <main className={'mx-auto max-w-xl px-4'}>
             <div>Comp: {competition.name}</div>
             {joinSection}
             <section>

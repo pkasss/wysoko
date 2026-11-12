@@ -1,6 +1,5 @@
 'use client';
 
-import {useOptimistic, useState, useTransition} from "react";
 import {
     type Boulder,
     type Boulders,
@@ -12,14 +11,11 @@ import {
     CLOSING_TIME,
     saveResultResponseMessage
 } from "@/src/lib/boulders-state";
+import {cn} from "@/src/lib/utils";
 import {saveResult} from "@/src/db/actions/results";
-
-const statusColor: Record<BoulderStatus, string> = {
-    none: 'bg-white border-black/15',
-    zone: 'bg-green-500 border-green-600 text-white',
-    top: 'bg-red-500 border-red-600 text-white',
-    flash: 'bg-yellow-400 border-yellow-500',
-};
+import {statusStyle} from "@/src/lib/boulders-state";
+import {useOptimistic, useState, useTransition} from "react";
+import {StatusLegend} from "@/src/components/StatusLegend";
 
 export function BouldersGrid({
     boulders, competitorId, heatStartTime, heatEndTime
@@ -60,19 +56,33 @@ export function BouldersGrid({
         });
     }
 
+    const toppedBoulders = optimisticBoulders.filter((boulder: Boulder) => boulder.isTop)
+
     return (
-        <section>
+        <section className={'flex flex-col gap-3'}>
+            <div className={'flex items-start justify-between'}>
+                <span className={'font-display text-8xl'}>
+                    Twoje bouldery.
+                </span>
+                <span className={'text-xl'}>
+                    {toppedBoulders.length}/{boulders.length}
+                </span>
+            </div>
+            <StatusLegend/>
             {errorCode && <p>{saveResultResponseMessage[errorCode]}</p>}
-            <div className={"grid grid-cols-5 gap-2"}>
+            <div className={"grid grid-cols-5 gap-2 pr-1 pb-1"}>
                 {optimisticBoulders.map((boulder) => (
                     <button
                         key={boulder.id}
                         type="button"
                         onClick={() => handleClick(boulder)}
-                        className={`rounded-xl border-2 py-2.5 transition-transform active:scale-95 ${statusColor[getBoulderStatus(boulder)]}`}
+                        className={cn(`border-2 border-black shadow-[3px_3px_0_#000] rounded-xl h-16 
+                                       active:translate-x-0.75 active:translate-y-0.75 active:shadow-none 
+                                       transition-transform`, statusStyle[getBoulderStatus(boulder)].className)
+                        }
                     >
-                        <span className={'block text-lg font-bold'}>{boulder.number}</span>
-                        <span className={'block text-sm'}>{boulder.grade}</span>
+                        <span className={'block text-2xl font-bold'}>{boulder.number}</span>
+                        <span className={'block text-xs'}>{boulder.grade}AV</span>
                     </button>
                 ))}
             </div>

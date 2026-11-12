@@ -25,7 +25,7 @@ export default async function Home() {
     )
 
     return (
-        <main>
+        <main className={''}>
             <pre>{JSON.stringify(ongoing, null, 2)}</pre>
             <pre>{JSON.stringify(finished, null, 2)}</pre>
         </main>
