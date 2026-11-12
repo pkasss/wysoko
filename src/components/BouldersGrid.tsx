@@ -61,7 +61,7 @@ export function BouldersGrid({
     return (
         <section className={'flex flex-col gap-3'}>
             <div className={'flex items-start justify-between'}>
-                <span className={'font-display text-8xl'}>
+                <span className={'font-display text-6xl'}>
                     Twoje bouldery.
                 </span>
                 <span className={'text-xl'}>
@@ -70,7 +70,7 @@ export function BouldersGrid({
             </div>
             <StatusLegend/>
             {errorCode && <p>{saveResultResponseMessage[errorCode]}</p>}
-            <div className={"grid grid-cols-5 gap-2 pr-1 pb-1"}>
+            <div className={"grid grid-cols-5 gap-2 pr-1 pb-1 touch-manipulation"}>
                 {optimisticBoulders.map((boulder) => (
                     <button
                         key={boulder.id}
