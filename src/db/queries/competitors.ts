@@ -11,6 +11,8 @@ export async function getCompetitors(userId: string, competitionId: number) {
         heatNumber: heat.number,
         startTime: heat.startTime,
         endTime: heat.endTime,
+        category: competitor.category,
+        gender: competitor.gender
     })
         .from(competitor)
         .innerJoin(heat, eq(competitor.heatId, heat.id))

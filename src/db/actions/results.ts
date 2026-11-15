@@ -76,7 +76,7 @@ export async function saveResult(
             })
     }
 
-    revalidatePath(`/zawody/${boulder.competitionSlug}`)
+    revalidatePath(`/zawody/${boulder.competitionSlug}/wyniki`)
 
     return {ok: true}
 }

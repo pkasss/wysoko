@@ -6,11 +6,11 @@ import {Panel} from "./Panel";
 import {cn} from "@/src/lib/utils";
 import {usePathname} from "next/navigation";
 
-export default function BottomNav({slug}: { slug: string }) {
+export function BottomNav({slug}: { slug: string }) {
     const compHref = `/zawody/${slug}`;
     const links = [
-        {label: 'Wyniki', href: compHref, icon: ListChecks},
-        {label: 'Ranking', href: `${compHref}/ranking`, icon: Trophy},
+        {label: 'Wyniki', href: `${compHref}/wyniki`, icon: ListChecks},
+        {label: 'Ranking', href: `${compHref}`, icon: Trophy},
         {label: 'Info', href: `${compHref}/info`, icon: Info},
     ];
 

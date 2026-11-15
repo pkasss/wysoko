@@ -1,5 +1,6 @@
 'use client';
 
+import {statusStyle} from "@/src/lib/boulders-state";
 import {
     type Boulder,
     type Boulders,
@@ -13,7 +14,6 @@ import {
 } from "@/src/lib/boulders-state";
 import {cn} from "@/src/lib/utils";
 import {saveResult} from "@/src/db/actions/results";
-import {statusStyle} from "@/src/lib/boulders-state";
 import {useOptimistic, useState, useTransition} from "react";
 import {StatusLegend} from "@/src/components/StatusLegend";
 

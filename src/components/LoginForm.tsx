@@ -9,6 +9,8 @@ import {
     FieldLabel,
     FieldError
 } from "@/src/components/ui/field";
+import {cn} from "@/src/lib/utils";
+import {Panel, panelClass} from "@/src/components/Panel";
 import {Input} from "@/src/components/ui/input";
 import {Button} from "@/src/components/ui/button";
 
@@ -28,7 +30,7 @@ export function LoginForm({
         setStatus('sending');
 
         const {error} = await authClient.signIn.magicLink({
-            email: mail,
+            email: mail.trim(),
             callbackURL,
             errorCallbackURL: "/error"
         });
@@ -42,44 +44,69 @@ export function LoginForm({
 
     if (status === 'sent') {
         return (
-            <div>
-                <h1>wysłaliśmy wiadomość na {mail}.</h1>
-                <Button
-                    variant={"outline"}
-                    onClick={() => {setStatus('idle')}}
+            <Panel className={'flex flex-col gap-4'}>
+                <h1 className={'font-display text-6xl leading-none'}>Sprawdź skrzynkę</h1>
+                <p>
+                    Wysłaliśmy link do logowania na{' '}
+                    <span className={'font-semibold break-all block font-display text-3xl'}>{mail}.</span>
+                </p>
+                <ul className={'flex list-disc flex-col gap-1 pl-5 text-sm'}>
+                    <li>Link jest ważny przez 15 minut.</li>
+                    <li className={'font-semibold'}>Otwórz go na telefonie, na którym chcesz wpisywać wyniki.</li>
+                    <li>Nie widzisz maila? Sprawdź folder ze spamem.</li>
+                </ul>
+                <button
+                    type={'button'}
+                    onClick={() => setStatus('idle')}
+                    className={cn(
+                        panelClass,
+                        `w-full py-3 font-display text-2xl active:translate-x-1.5 
+                        active:translate-y-1.5 active:shadow-none transition-transform`
+                    )}
                 >
-                    wpisz inny mail
-                </Button>
-            </div>
+                    Wpisz inny mail
+                </button>
+            </Panel>
+
         )
     }
 
     return (
-        <form className={"w-full max-w-sm"} onSubmit={handleSubmit}>
-            <FieldLabel htmlFor={"email"}>podaj maila.</FieldLabel>
-            <Field>
-                <Input
-                    id={"email"}
-                    type={"email"}
-                    required
-                    placeholder={"example@mail.com"}
-                    value={mail}
-                    onChange={(e) => setMail(e.target.value)}
-                />
-                <FieldDescription>na podany adres otrzymasz maila z linkiem do logowania.</FieldDescription>
-            </Field>
-            <Button
-                type={"submit"}
-                variant={"outline"}
-                disabled={status === 'sending'}
-            >
-                {status === 'sending' ? "wysyłanie..." : "kontynuuj"}
-            </Button>
-            {status === 'error' &&
-                <FieldError>
-                    nie udało się wysłać linku, spróbuj ponownie.
-                </FieldError>
-            }
-        </form>
+        <Panel>
+            <h1 className={'font-display text-6xl pb-4'}>Zaloguj się</h1>
+            <form className={'flex flex-col gap-2 w-full max-w-sm'} onSubmit={handleSubmit}>
+                <FieldLabel htmlFor={"email"} className={'text-lg'}>
+                    podaj maila.
+                </FieldLabel>
+                <Field>
+                    <Input
+                        id={"email"}
+                        type={"email"}
+                        required
+                        placeholder={"example@mail.com"}
+                        value={mail}
+                        onChange={(e) => setMail(e.target.value)}
+                    />
+                    <FieldDescription className={'text-xs'}>
+                        użyj maila, który podałeś przy zapisach na zawody.
+                    </FieldDescription>
+                </Field>
+                <Button
+                    type={"submit"}
+                    variant={"outline"}
+                    disabled={status === 'sending'}
+                    className={cn(`m-3 h-auto font-display text-2xl active:bg-[#ff3d8f] 
+                                   active:translate-x-0.75 active:translate-y-0.75 
+                                   active:shadow-none`, panelClass)}
+                >
+                    {status === 'sending' ? "wysyłanie..." : "kontynuuj"}
+                </Button>
+                {status === 'error' &&
+                    <FieldError>
+                        nie udało się wysłać linku, spróbuj ponownie.
+                    </FieldError>
+                }
+            </form>
+        </Panel>
     );
 }
