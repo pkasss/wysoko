@@ -7,3 +7,7 @@ export function normalizeName(name: string): string {
         .toLocaleLowerCase('pl')
         .replace(/(^|[\s\-'])(\p{L})/gu, (match) => match.toLocaleUpperCase('pl'));
 }
+
+export function getFirstName(name: string):string {
+    return name.split(' ')[0];
+}

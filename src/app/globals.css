@@ -124,10 +124,11 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-mono;
+    @apply font-sans;
   }
 }
 
 @theme inline {
   --font-display: var(--font-bebas);
+  --font-sans: var(--font-inter);
 }

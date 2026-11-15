@@ -7,6 +7,7 @@ import {getCompetition} from "@/src/db/queries/competitions";
 import {getAllHeats} from "@/src/db/queries/heats";
 import {normalizeName} from "@/src/lib/names";
 import {sql} from "drizzle-orm";
+import {linkCompetitionToUsers, linkCompetitorsToUser} from "@/src/db/mutations/competitors";
 
 const args = process.argv.slice(2);
 const IMPORT_DATA_COLUMNS = [
@@ -148,6 +149,8 @@ async function main() {
                 heatId: sql`excluded."heatId"`
             }
         })
+
+    await linkCompetitionToUsers(competition.id);
 
     console.log(`W pliku: ${participants.length}`);
     console.log(`Bez płatności (pominięci): ${participants.length - participantsWithPayment.length}`);

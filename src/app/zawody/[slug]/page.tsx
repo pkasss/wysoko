@@ -1,45 +1,25 @@
 import Link from "next/link";
 import {auth} from "@/src/lib/auth";
+import {CLOSING_TIME} from "@/src/lib/boulders-state";
 import {buttonVariants} from "@/src/components/ui/button";
+import {getCompetition} from "@/src/db/queries/competitions";
 
+import {cn} from "@/src/lib/utils"
 import {headers} from "next/headers";
-import {getToday} from "@/src/lib/dates";
 import {notFound} from "next/navigation";
+import {getFirstName} from "@/src/lib/names";
 import {Panel} from "@/src/components/Panel";
-import {getLeaderboard} from "@/src/db/queries/leaderboard";
+import {formatTime, getToday} from "@/src/lib/dates";
 import {BouldersGrid} from "@/src/components/BouldersGrid";
 import {getCompetitors} from "@/src/db/queries/competitors";
-import {getCompetition} from "@/src/db/queries/competitions";
 import {getBouldersWithResults} from "@/src/db/queries/boulders";
-import {
-    isLeaderboardType,
-    DEFAULT_LEADERBOARD,
-    LEADERBOARDS,
-    type LeaderboardType,
-    LEADERBOARD_TYPES
-} from "@/src/lib/ranking";
-
-type CompetitionHrefOptions = {competitorId?: number, leaderboard?: LeaderboardType};
-function competitionHref(slug: string, {competitorId, leaderboard}: CompetitionHrefOptions) {
-    const params = new URLSearchParams();
-
-    if (competitorId !== undefined) {
-        params.append('zawodnik', String(competitorId));
-    }
-    if (leaderboard) {
-        params.append('ranking', leaderboard);
-    }
-
-    const query = params.size > 0 ? `?${params}` : ''
-
-    return `/zawody/${slug}${query}`;
-}
+import {Countdown} from "@/src/components/Countdown";
 
 export default async function Competition({
     params, searchParams
 }: {
     params: Promise<{ slug: string }>,
-    searchParams: Promise<{ zawodnik?: string, ranking?: string }>
+    searchParams: Promise<{ zawodnik?: string }>
 }) {
     const session = await auth.api.getSession({
         headers: await headers()
@@ -53,35 +33,50 @@ export default async function Competition({
     }
 
     const competitors = session ? await getCompetitors(session.user.id, competition.id) : [];
-    const {zawodnik, ranking} = await searchParams;
+    const {zawodnik} = await searchParams;
     const competitor = competitors.find(c => c.id === Number(zawodnik)) ?? competitors[0];
 
     const isFinished = competition.endDate < getToday();
-
-    const leaderboardType = ranking && isLeaderboardType(ranking) ? ranking : DEFAULT_LEADERBOARD;
-    const {category, gender} = LEADERBOARDS[leaderboardType];
-    const leaderboard = await getLeaderboard(competition.id, category, gender);
 
     let joinSection: React.ReactNode;
 
     if (competitor) {
 
-        const boulders = await getBouldersWithResults(competition.id, competitor.id)
+        const boulders = await getBouldersWithResults(competition.id, competitor.id);
+        const heatNumber = competitor.heatNumber ?? 'Dożynkowa';
+        const openingTime = competitor.startTime;
+        const endingTime = competitor.endTime;
+        const closingTime = new Date(endingTime.getTime() + CLOSING_TIME);
 
         joinSection = (
             <>
                 <Panel>
+                    <p className={'text-lg'}>Cześć,</p>
+                    <h2 className={'text-7xl font-display pb-4'}>{getFirstName(competitor.name)}!</h2>
+                    <div className={'flex flex-col tabular-nums'}>
+                        <p>
+                            <span className={'font-bold'}>
+                                Grupa {heatNumber}
+                            </span>
+                            {' · '}
+                            <span>{formatTime(openingTime)}–{formatTime(endingTime)}</span>
+                        </p>
+                        <p>Wyniki możesz wpisywać do {formatTime(closingTime)}</p>
+                    </div>
+                    <Countdown startTime={competitor.startTime} endTime={competitor.endTime}/>
                     {competitors.length > 1 && (
                         <nav className={'flex gap-2'}>
                             {competitors.map((c) => (
                                 <Link
                                     key={c.id}
-                                    href={competitionHref(slug, {competitorId: c.id, leaderboard: leaderboardType})}
-                                    className={buttonVariants({
+                                    href={`/zawody/${slug}?zawodnik=${c.id}`}
+                                    className={cn(buttonVariants({
                                         variant: c.id === competitor.id ? 'default' : 'outline',
-                                    })}
+                                    }), 'border-2 border-black shadow-[3px_3px_0_#000] rounded-full ' +
+                                        'active:translate-x-0.75 active:translate-y-0.75 active:shadow-none ' +
+                                        'transition-transform')}
                                 >
-                                    {c.name.split(' ')[0]}
+                                    {getFirstName(c.name)}
                                 </Link>
                             ))}
                         </nav>
@@ -117,49 +112,8 @@ export default async function Competition({
     }
 
     return (
-        <main className={'mx-auto max-w-xl px-4'}>
-            <div>Comp: {competition.name}</div>
+        <>
             {joinSection}
-            <section>
-                <h2>{LEADERBOARDS[leaderboardType].label}</h2>
-                <nav className={'flex gap-2'}>
-                    {LEADERBOARD_TYPES.map((key) => (
-                        <Link
-                            key={key}
-                            href={competitionHref(slug, {competitorId: competitor?.id, leaderboard: key})}
-                            className={buttonVariants({
-                                variant: key === leaderboardType ? 'default' : 'outline',
-                            })}
-                        >
-                            {LEADERBOARDS[key].label}
-                        </Link>
-                    ))}
-                </nav>
-                {leaderboard.length === 0 ? (
-                    <p>brak wyników.</p>
-                ) : (
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>imię i nazwisko</th>
-                                <th>suma punktów</th>
-                                <th>liczba fleszy</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {leaderboard.map((result) => (
-                            <tr key={result.competitorId}>
-                                <td>{result.place}</td>
-                                <td>{result.name}</td>
-                                <td>{result.pointsSum}</td>
-                                <td>{result.flashCount}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                )}
-            </section>
-        </main>
+        </>
     );
 }

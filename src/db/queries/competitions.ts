@@ -3,6 +3,7 @@ import "server-only";
 import {db} from "@/src/db";
 import {competition} from "@/src/db/schema";
 import {desc, eq} from "drizzle-orm";
+import {cache} from "react";
 
 export async function getCompetitions() {
     return db.select({
@@ -15,7 +16,7 @@ export async function getCompetitions() {
         .orderBy(desc(competition.startDate));
 }
 
-export async function getCompetition(slug: string) {
+export const getCompetition = cache(async (slug: string) => {
     const [row] = await db.select({
         id: competition.id,
         name: competition.name,
@@ -28,4 +29,4 @@ export async function getCompetition(slug: string) {
         .limit(1);
 
     return row;
-}
+});

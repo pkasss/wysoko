@@ -7,7 +7,6 @@ import {db} from "@/src/db";
 import {
     CLOSING_TIME,
     isBoulderStatus,
-    RESULT_ENTRY_MINUTES,
     SaveResultResponse,
     statusFlags
 } from "@/src/lib/boulders-state";
