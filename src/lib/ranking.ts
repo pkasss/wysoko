@@ -17,7 +17,28 @@ export type Leaderboard = {
 
 export const LEADERBOARDS: Record<LeaderboardType, Leaderboard> = {
     'adult-m': {category: 'adult', gender: 'm', label: 'ADULT M'},
-    'adult-k': {category: 'adult', gender: 'k', label: 'ADULT K'},
+    'adult-k': {category: 'adult', gender: 'k', label: 'ADULT W'},
     'kids-m': {category: 'kids', gender: 'm', label: 'KIDS M'},
-    'kids-k': {category: 'kids', gender: 'k', label: 'KIDS K'}
+    'kids-k': {category: 'kids', gender: 'k', label: 'KIDS W'}
 }
+
+export const LEVELS= [
+    {name: 'GOD MODE', abovePercent: 80},
+    {name: 'HELLRAISER', abovePercent: 50},
+    {name: 'ROOKIE', abovePercent: -1}
+] as const;
+
+export function getLevel(beaten: number, total: number) {
+    const percentage = (beaten / total) * 100;
+    const level = LEVELS.find((l) => percentage > l.abovePercent);
+
+    return level?.name ?? 'ROOKIE';
+}
+
+export type Level = typeof LEVELS[number]['name'];
+
+export const levelStyle: Record<Level, string> = {
+    'GOD MODE': 'bg-[#ff3d8f]',
+    'HELLRAISER': 'bg-[#ffd6e7]',
+    'ROOKIE': 'bg-white',
+};

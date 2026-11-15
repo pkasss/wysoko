@@ -1,13 +1,15 @@
 import Link from "next/link";
 import {auth} from "@/src/lib/auth";
-import {buttonVariants} from "@/src/components/ui/button";
 import {getCompetition} from "@/src/db/queries/competitions";
 import {
     DEFAULT_LEADERBOARD,
     LEADERBOARDS,
     LEADERBOARD_TYPES,
-    isLeaderboardType, LeaderboardType
+    levelStyle,
+    isLeaderboardType, getLevel,
+    LeaderboardType
 } from "@/src/lib/ranking";
+import {Fragment} from "react";
 import {cn} from "@/src/lib/utils";
 import {headers} from "next/headers";
 import {notFound} from "next/navigation";
@@ -17,15 +19,17 @@ import {RankingSummary} from "@/src/components/RankingSummary";
 import {getCompetitors} from "@/src/db/queries/competitors";
 import {Category, Gender} from "@/src/db/schema";
 
-function pickLeaderboard({ranking, competitors}: {
+function pickLeaderboard({ranking, zawodnik, competitors}: {
     ranking: string | undefined;
-    competitors: { category: Category, gender: Gender }[];
+    zawodnik: string | undefined;
+    competitors: { id: number, category: Category, gender: Gender }[];
 }): LeaderboardType {
-    const competitor = competitors.at(0);
-
     if (ranking && isLeaderboardType(ranking)) {
         return ranking;
     }
+
+    const competitor = competitors.find(c => c.id === Number(zawodnik)) ?? competitors.at(0);
+
     if (competitor) {
         const key = `${competitor.category}-${competitor.gender}`;
 
@@ -35,18 +39,27 @@ function pickLeaderboard({ranking, competitors}: {
     return DEFAULT_LEADERBOARD;
 }
 
+function getHref(slug: string, ranking: LeaderboardType, zawodnik: string | undefined) {
+    const query = new URLSearchParams({ranking});
+    if (zawodnik) {
+        query.set('zawodnik', zawodnik);
+    }
+
+    return `/zawody/${slug}?${query}`;
+}
+
 export default async function CompetitionRanking({
-                                                     params, searchParams
-                                                 }: {
+    params, searchParams
+}: {
     params: Promise<{ slug: string }>
-    searchParams: Promise<{ ranking?: string }>
+    searchParams: Promise<{ ranking?: string, zawodnik?: string }>
 }) {
     const session = await auth.api.getSession({
         headers: await headers()
     })
 
     const {slug} = await params;
-    const {ranking} = await searchParams;
+    const {ranking, zawodnik} = await searchParams;
 
     const competition = await getCompetition(slug);
     if (!competition) {
@@ -55,21 +68,33 @@ export default async function CompetitionRanking({
 
     const competitors = session ? await getCompetitors(session.user.id, competition.id) : [];
 
-    const leaderboardType = pickLeaderboard({ranking, competitors});
+    const leaderboardType = pickLeaderboard({ranking, zawodnik, competitors});
     const {category, gender} = LEADERBOARDS[leaderboardType];
     const leaderboard = await getLeaderboard(competition.id, category, gender);
 
     const myCompetitorsIds = new Set(competitors.map((c) => c.id));
     const myRows = leaderboard.filter((row) => myCompetitorsIds.has(row.competitorId));
 
+    const placeCounts = new Map<number, number>();
+    for (const result of leaderboard) {
+        placeCounts.set(result.place, (placeCounts.get(result.place) ?? 0) + 1);
+    }
+    const rows = leaderboard.map((row) => {
+        const tied = placeCounts.get(row.place) ?? 0;
+        const beaten = leaderboard.length - (row.place - 1) - tied;
+        const level = category === 'adult' ? getLevel(beaten, leaderboard.length) : null;
+
+        return {...row, level};
+    });
+
     return (
         <>
             {!session && (
                 <Link
-                    href={`/login?next=/zawody/${competition.slug}/wyniki`}>
-                    <Panel className={cn(pressableClass, 'text-center text-4xl')}>
-                        Startujesz? Zaloguj się!
-                    </Panel>
+                    href={`/login?next=/zawody/${competition.slug}/wyniki`}
+                    className={cn(pressableClass, 'text-center text-4xl block')}
+                >
+                    Startujesz? Zaloguj się!
                 </Link>
             )}
             {myRows.map((row) => (
@@ -80,17 +105,17 @@ export default async function CompetitionRanking({
                     above={leaderboard.findLast((other) => other.place < row.place)}
                 />
             ))}
-            <Panel>
-                <h2>{LEADERBOARDS[leaderboardType].label}</h2>
-                <nav className={'flex gap-2'}>
+            <Panel className={'flex flex-col items-center gap-4'}>
+                <h2 className={'font-display text-6xl'}>{LEADERBOARDS[leaderboardType].label}</h2>
+                <nav className={'flex flex-wrap gap-3'}>
                     {LEADERBOARD_TYPES.map((key) => (
                         <Link
                             key={key}
-                            href={`/zawody/${slug}/?ranking=${key}`}
+                            href={getHref(slug, key, zawodnik)}
                             scroll={false}
-                            className={buttonVariants({
-                                variant: key === leaderboardType ? 'default' : 'outline',
-                            })}
+                            className={cn(pressableClass,
+                                key === leaderboardType ? 'bg-black text-white' : 'bg-white',
+                                'py-2 text-base rounded-full')}
                         >
                             {LEADERBOARDS[key].label}
                         </Link>
@@ -99,24 +124,59 @@ export default async function CompetitionRanking({
                 {leaderboard.length === 0 ? (
                     <p>brak wyników.</p>
                 ) : (
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>imię i nazwisko</th>
-                            <th>suma punktów</th>
-                            <th>liczba fleszy</th>
+                    <table className={'w-full text-sm'}>
+                        <thead className={`sticky top-[calc(env(safe-area-inset-top)+0.5rem)] 
+                                           z-10 text-xs text-left uppercase tracking-wide`}>
+                        <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
+                                        *:last:rounded-r-full *:last:pr-4 
+                                        *:shadow-[inset_0_2px_0_#000,inset_0_-2px_0_#000,4px_4px_0_#000]`}>
+                            <th scope={'col'} className={'w-10'}>#</th>
+                            <th scope={'col'}>Zawodnik</th>
+                            <th scope={'col'} className={'text-right'}>Pkt</th>
+                            <th scope={'col'} className={'text-right'}>Fl.</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {leaderboard.map((result) => (
-                            <tr key={result.competitorId}>
-                                <td>{result.place}</td>
-                                <td>{result.name}</td>
-                                <td>{result.pointsSum}</td>
-                                <td>{result.flashCount}</td>
-                            </tr>
-                        ))}
+                        {rows.map((row, index) => {
+                            const isNewLevel = row.level && row.level !== rows[index - 1]?.level;
+
+                            return (
+                                <Fragment key={row.competitorId}>
+                                    {isNewLevel && row.level && (
+                                        <tr>
+                                            <th
+                                                colSpan={4}
+                                                scope={'rowgroup'}
+                                                className={cn('pb-2', index === 0 ? 'pt-2' : 'pt-6')}
+                                            >
+                                                <span
+                                                    className={cn(
+                                                        `inline-block rounded-lg border-2 
+                                                        border-black px-3 pt-1 font-display 
+                                                        text-3xl leading-none shadow-[2px_2px_0_#000]`,
+                                                        levelStyle[row.level]
+                                                    )}
+                                                >
+                                                    {row.level}
+                                                </span>
+                                            </th>
+                                        </tr>
+                                    )}
+                                    <tr
+                                        className={cn(
+                                            '*:py-2.5 border-t border-black/10',
+                                            row.level && levelStyle[row.level],
+                                            myCompetitorsIds.has(row.competitorId) &&
+                                            'bg-black text-white border-2 border-black')}
+                                    >
+                                        <td className={'pl-2 font-display text-2xl'}>{row.place}</td>
+                                        <td className={'font-semibold'}>{row.name}</td>
+                                        <td className={'tabular-nums text-center'}>{row.pointsSum}</td>
+                                        <td className={'pr-2 tabular-nums text-center'}>{row.flashCount}</td>
+                                    </tr>
+                                </Fragment>
+                            )
+                        })}
                         </tbody>
                     </table>
                 )}

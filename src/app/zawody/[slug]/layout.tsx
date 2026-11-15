@@ -1,5 +1,7 @@
 import {ReactNode} from "react";
+import {auth} from "@/src/lib/auth";
 import {getCompetition} from "@/src/db/queries/competitions";
+import {headers} from "next/headers";
 import {notFound} from "next/navigation";
 import {Panel} from "@/src/components/Panel";
 import {BottomNav} from "@/src/components/BottomNav";
@@ -10,6 +12,9 @@ export default async function CompetitionLayout({
     params: Promise<{ slug: string }>,
     children: ReactNode;
 }) {
+    const session = await auth.api.getSession({
+        headers: await headers()
+    });
 
     const {slug} = await params;
 
@@ -28,7 +33,9 @@ export default async function CompetitionLayout({
             </Panel>
             <Panel className={'text-8xl font-display'}>{competition.name}</Panel>
             {children}
-            <BottomNav slug={slug}/>
+            {session && (
+                <BottomNav slug={slug}/>
+            )}
         </main>
     );
 }
