@@ -8,6 +8,7 @@ export const heatType = pgEnum('heat_type', ['qualification', 'harvestFest']);
 export type Category = (typeof categoryType.enumValues)[number];
 export type Gender = (typeof genderType.enumValues)[number];
 
+
 export const competition = pgTable('competition', {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     name: text().notNull(),
@@ -18,8 +19,7 @@ export const competition = pgTable('competition', {
     topMultiplier: integer().notNull()
 });
 
-export const competitor = pgTable('competitor',
-    {
+export const competitor = pgTable('competitor', {
         id: integer().primaryKey().generatedAlwaysAsIdentity(),
         userId: text()
             .references(() => user.id, {onDelete: "set null"}),
@@ -32,7 +32,7 @@ export const competitor = pgTable('competitor',
         heatId: integer()
             .references(() => heat.id)
             .notNull(),
-        competitionId: integer('competition_id')
+        competitionId: integer()
             .references(() => competition.id)
             .notNull()
     }, (table) => [
@@ -40,12 +40,11 @@ export const competitor = pgTable('competitor',
     ]
 );
 
-export const heat = pgTable('heat',
-    {
+export const heat = pgTable('heat', {
         id: integer().primaryKey().generatedAlwaysAsIdentity(),
         number: integer(),
         type: heatType().notNull(),
-        competitionId: integer('competition_id')
+        competitionId: integer()
             .references(() => competition.id)
             .notNull(),
         startTime: timestamp({withTimezone: true}).notNull(),
@@ -55,12 +54,21 @@ export const heat = pgTable('heat',
     ]
 );
 
-export const boulder = pgTable('boulder',
-    {
+export const boulderStatusType = pgEnum('boulder_status_type', ['none', 'zone', 'top', 'flash']);
+
+export const harvestFestChange = pgTable('harvest_fest_change', {
+    competitorId: integer().notNull().references(() => competitor.id, {onDelete: "cascade"}),
+    boulderId: integer().notNull().references(() => boulder.id, {onDelete: "cascade"}),
+    previousStatus: boulderStatusType().notNull()
+}, (table) => [
+    unique().on(table.competitorId, table.boulderId)
+]);
+
+export const boulder = pgTable('boulder', {
         id: integer().primaryKey().generatedAlwaysAsIdentity(),
         number: integer().notNull(),
         grade: integer().notNull(),
-        competitionId: integer('competition_id')
+        competitionId: integer()
             .references(() => competition.id)
             .notNull()
     },
@@ -69,13 +77,12 @@ export const boulder = pgTable('boulder',
     ]
 );
 
-export const result = pgTable('result',
-    {
+export const result = pgTable('result', {
         id: integer().primaryKey().generatedAlwaysAsIdentity(),
-        competitorId: integer('competitor_id')
+        competitorId: integer()
             .references(() => competitor.id, {onDelete: "cascade"})
             .notNull(),
-        boulderId: integer('boulder_id')
+        boulderId: integer()
             .references(() => boulder.id)
             .notNull(),
         isZone: boolean().default(false).notNull(),

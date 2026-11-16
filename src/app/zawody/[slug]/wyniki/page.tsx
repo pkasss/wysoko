@@ -115,12 +115,12 @@ export default async function CompetitionResults({
             <Panel className={'flex flex-col text-center gap-2'}>
                 <h1 className={'font-display text-4xl'}>Nie ma Cię na liście uczestników.</h1>
                 <p>
-                    Jesteś zalogowany jako:{' '}
+                    Zalogowano jako:{' '}
                     <span className={'font-semibold'}>{session.user.email}</span>
                 </p>
                 <p>
                     Wyloguj się i zaloguj mailem podanym przy zapisie na zawody.
-                    Jeżeli podałeś poprawnego maila zgłoś się do biura zawodów.
+                    Jeżeli mail jest poprawny zgłoś się do biura zawodów.
                 </p>
                 <SignOutButton slug={slug} className={cn('text-2xl', pressableClass)}/>
             </Panel>

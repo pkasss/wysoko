@@ -15,7 +15,7 @@ export default function Error({error, reset}: { error: Error & { digest?: string
             <Panel className={'flex flex-col gap-4'}>
                 <h1 className={'font-display text-6xl leading-none'}>Coś poszło nie tak</h1>
                 <p className={'text-black/70'}>
-                    Spróbuj ponownie. Jeśli logowałeś się z maila, link mógł już zostać użyty albo wygasnąć.
+                    Spróbuj ponownie. Jeśli logowanie było z linku w mailu, mógł on już zostać użyty albo wygasnąć.
                 </p>
                 <div className={'flex flex-wrap gap-3'}>
                     <button

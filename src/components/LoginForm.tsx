@@ -98,7 +98,7 @@ export function LoginForm({
                         onChange={(e) => setMail(e.target.value)}
                     />
                     <FieldDescription className={'text-xs'}>
-                        użyj maila, który podałeś przy zapisach na zawody.
+                        użyj maila podanego przy zapisach na zawody.
                     </FieldDescription>
                 </Field>
                 <Button
