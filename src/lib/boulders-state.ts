@@ -10,6 +10,8 @@ export type Boulder = Boulders[number];
 export const BOULDER_STATUSES = ['none', 'zone', 'top', 'flash'] as const;
 export type BoulderStatus = typeof BOULDER_STATUSES[number];
 
+export const TAP_ORDER = ['none', 'flash', 'top', 'zone'] as readonly BoulderStatus[];
+
 export type SaveResultCode = 'invalid' | 'unauthorized' | 'not_found' | 'not_competitor' | 'not_started' | 'closed';
 export type SaveResultResponse = {ok: true} | {ok: false, reason: SaveResultCode};
 export const saveResultResponseMessage: Record<SaveResultCode, string> = {
@@ -48,7 +50,7 @@ export function isBoulderStatus(value: string): value is BoulderStatus {
 }
 
 export function getNextStatus(status: BoulderStatus): BoulderStatus {
-    const index = BOULDER_STATUSES.indexOf(status);
+    const index = TAP_ORDER.indexOf(status);
 
-    return BOULDER_STATUSES[(index + 1) % BOULDER_STATUSES.length];
+    return TAP_ORDER[(index + 1) % TAP_ORDER.length];
 }
