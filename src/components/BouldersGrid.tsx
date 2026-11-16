@@ -69,7 +69,11 @@ export function BouldersGrid({
                 </span>
             </div>
             <StatusLegend/>
-            {errorCode && <p>{saveResultResponseMessage[errorCode]}</p>}
+            {errorCode && <p
+                className={'flex flex-col text-center rounded-xl border-2 border-black bg-[#ffd6e7] px-3 py-2'}
+            >
+                {saveResultResponseMessage[errorCode]}
+            </p>}
             <div className={"grid grid-cols-5 gap-2 pr-1 pb-1"}>
                 {optimisticBoulders.map((boulder) => (
                     <button

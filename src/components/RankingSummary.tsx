@@ -1,19 +1,10 @@
-import {cn} from "@/src/lib/utils";
 import {Panel} from "@/src/components/Panel";
+import {StatTile} from "@/src/components/StatTile";
 import {getFirstName} from "@/src/lib/names";
 import type {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {statusStyle} from "@/src/lib/boulders-state";
 
 type LeaderboardRow = Awaited<ReturnType<typeof getLeaderboard>>[number];
-
-function StatTile({label, value, className}: {label:string, value: string | number, className?: string}) {
-    return (
-        <div className={cn('rounded-lg px-3 py-2 border-2 border-black', className)}>
-            <p className={'font-semibold text-sm'}>{label}</p>
-            <p className={'font-display text-4xl'}>{value}</p>
-        </div>
-    )
-}
 
 export function RankingSummary({
     row, total, above

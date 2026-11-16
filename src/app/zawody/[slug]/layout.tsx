@@ -1,4 +1,5 @@
 import {ReactNode} from "react";
+import Image from "next/image";
 import {auth} from "@/src/lib/auth";
 import {getCompetition} from "@/src/db/queries/competitions";
 import {headers} from "next/headers";
@@ -28,6 +29,16 @@ export default async function CompetitionLayout({
 
     return (
         <main className={'flex flex-col gap-3 mx-auto max-w-xl px-4 pt-2 pb-28'}>
+            <div className={'sticky top-0 z-20 -mx-4 flex justify-center bg-[whitesmoke]/90 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 backdrop-blur'}>
+                <Image
+                    src={'/avatar-logo-full.svg'}
+                    alt={'Avatar Climbing'}
+                    width={920}
+                    height={644}
+                    priority
+                    className={'h-20 w-auto'}
+                />
+            </div>
             <Panel className={'w-fit px-3 py-1 text-lg uppercase'}>
                 {competitionDate}
             </Panel>

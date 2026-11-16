@@ -6,9 +6,15 @@ import {boulder, competition, competitor, heat, result} from './schema';
 const SLUG = 'test-krakem-all';
 const NAME = "TEST KRAK'EM ALL";
 const MINUTE = 60 * 1000;
-const QUALIFICATION_HEATS = 10;
+const DAY = 24 * 60 * MINUTE;
 const QUALIFICATION_LENGTH = 165 * MINUTE;
 const HARVEST_FEST_LENGTH = 180 * MINUTE;
+const RESULTS_REVEAL_DELAY = 15 * MINUTE;
+
+const DAILY_HEAT_STARTS = ['8:00', '11:00', '14:15', '17:15', '20:30'];
+const QUALIFICATION_DAYS = 2;
+const HARVEST_FEST_DAY = 2;
+const HARVEST_FEST_START = '9:00';
 
 const GRADE_DISTRIBUTION: [grade: number, count: number][] = [
     [2, 3],
@@ -25,46 +31,122 @@ const toDateString = (date: Date) => date.toLocaleDateString('en-CA', {timeZone:
 
 const formatTime = (date: Date) => date.toLocaleString('pl-PL', {timeZone: 'Europe/Warsaw'});
 
+function toMinutes(time: string) {
+    const [hours, minutes] = time.split(':').map(Number);
+    return (hours ?? 0) * 60 + (minutes ?? 0);
+}
+
+const FIRST_HEAT_START = toMinutes(DAILY_HEAT_STARTS[0] ?? '8:00');
+
+function offsetFromFirstHeat(day: number, time: string) {
+    return day * DAY + (toMinutes(time) - FIRST_HEAT_START) * MINUTE;
+}
+
+const HARVEST_FEST_OFFSET = offsetFromFirstHeat(HARVEST_FEST_DAY, HARVEST_FEST_START);
+
+type HeatTimes = {start: Date; end: Date};
+
+type Schedule = {
+    qualification: (number: number) => HeatTimes;
+    harvestFest: HeatTimes;
+};
+
+function minutesSinceMidnightInWarsaw(date: Date) {
+    const time = date.toLocaleTimeString('en-GB', {timeZone: 'Europe/Warsaw', hour12: false});
+    return toMinutes(time);
+}
+
+function buildSchedule(mode: string | undefined, lengthArg: string | undefined): Schedule {
+    const now = new Date(Math.floor(Date.now() / MINUTE) * MINUTE);
+    const after = (base: Date, offset: number) => new Date(base.getTime() + offset);
+
+    if (mode === undefined) {
+        const midnight = after(now, (24 * 60 - minutesSinceMidnightInWarsaw(now)) * MINUTE);
+        const end = after(midnight, -MINUTE);
+        const harvestFestStart = after(midnight, toMinutes(HARVEST_FEST_START) * MINUTE);
+        return {
+            qualification: () => ({start: now, end}),
+            harvestFest: {start: harvestFestStart, end: after(harvestFestStart, HARVEST_FEST_LENGTH)},
+        };
+    }
+
+    if (mode === 'harmonogram') {
+        return {
+            qualification: (number) => {
+                const day = Math.floor((number - 1) / DAILY_HEAT_STARTS.length);
+                const time = DAILY_HEAT_STARTS[(number - 1) % DAILY_HEAT_STARTS.length] ?? '8:00';
+                const start = after(now, offsetFromFirstHeat(day, time));
+                return {start, end: after(start, QUALIFICATION_LENGTH)};
+            },
+            harvestFest: {
+                start: after(now, HARVEST_FEST_OFFSET),
+                end: after(now, HARVEST_FEST_OFFSET + HARVEST_FEST_LENGTH),
+            },
+        };
+    }
+
+    if (mode === 'dozynkowa') {
+        const minutes = lengthArg === undefined ? HARVEST_FEST_LENGTH / MINUTE : Number(lengthArg);
+        if (!Number.isInteger(minutes) || minutes <= 0) {
+            throw new Error('Długość Dożynkowej podaj w minutach, np. create dozynkowa 10');
+        }
+        const qualificationEnd = after(now, -60 * MINUTE);
+        return {
+            qualification: () => ({start: after(qualificationEnd, -QUALIFICATION_LENGTH), end: qualificationEnd}),
+            harvestFest: {start: now, end: after(now, minutes * MINUTE)},
+        };
+    }
+
+    throw new Error(`Nieznany tryb: ${mode}. Dostępne: create, create harmonogram, create dozynkowa [minuty]`);
+}
+
 async function findTestCompetition() {
     const [found] = await db.select({id: competition.id}).from(competition).where(eq(competition.slug, SLUG));
     return found;
 }
 
-async function create() {
+async function create(mode: string | undefined, lengthArg: string | undefined) {
     if (await findTestCompetition()) {
         throw new Error(`Zawody testowe (${SLUG}) już istnieją. Najpierw je usuń: remove`);
     }
 
-    const start = new Date(Math.floor(Date.now() / MINUTE) * MINUTE);
+    const schedule = buildSchedule(mode, lengthArg);
+    const heatNumbers = Array.from({length: QUALIFICATION_DAYS * DAILY_HEAT_STARTS.length}, (_, i) => i + 1);
+    const firstHeat = schedule.qualification(1);
 
     const [created] = await db
         .insert(competition)
         .values({
             name: NAME,
             slug: SLUG,
-            startDate: toDateString(start),
-            endDate: toDateString(new Date(start.getTime() + 24 * 60 * MINUTE)),
+            startDate: toDateString(firstHeat.start),
+            endDate: toDateString(schedule.harvestFest.end),
             zoneMultiplier: 3,
             topMultiplier: 4,
         })
         .returning();
 
+    const qualificationHeats = heatNumbers.map((number) => {
+        const {start, end} = schedule.qualification(number);
+        return {
+            number,
+            type: 'qualification' as const,
+            competitionId: created.id,
+            startTime: start,
+            endTime: end,
+        };
+    });
+
     const createdHeats = await db
         .insert(heat)
         .values([
-            ...Array.from({length: QUALIFICATION_HEATS}, (_, i) => ({
-                number: i + 1,
-                type: 'qualification' as const,
-                competitionId: created.id,
-                startTime: start,
-                endTime: new Date(start.getTime() + QUALIFICATION_LENGTH),
-            })),
+            ...qualificationHeats,
             {
                 number: null,
                 type: 'harvestFest' as const,
                 competitionId: created.id,
-                startTime: start,
-                endTime: new Date(start.getTime() + HARVEST_FEST_LENGTH),
+                startTime: schedule.harvestFest.start,
+                endTime: schedule.harvestFest.end,
             },
         ])
         .returning();
@@ -77,6 +159,9 @@ async function create() {
         console.log(`  grupa ${h.number ?? 'Dożynkowa'}: ${formatTime(h.startTime)} – ${formatTime(h.endTime)}`),
     );
     console.log(`  bouldery: ${grades.length}`);
+    console.log(
+        `  ranking ukryty: ${formatTime(schedule.harvestFest.start)} – ${formatTime(new Date(schedule.harvestFest.end.getTime() + RESULTS_REVEAL_DELAY))}`,
+    );
     console.log(`\nImport: npx tsx --conditions=react-server src/db/import-competit.ts <plik> ${created.id}`);
 }
 
@@ -110,11 +195,11 @@ async function main() {
 
     const command = process.argv[2];
     if (command === 'create') {
-        await create();
+        await create(process.argv[3], process.argv[4]);
     } else if (command === 'remove') {
         await remove();
     } else {
-        throw new Error('Podaj polecenie: create albo remove');
+        throw new Error('Podaj polecenie: create, create harmonogram, create dozynkowa [minuty] albo remove');
     }
 }
 

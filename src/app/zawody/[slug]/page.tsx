@@ -18,6 +18,9 @@ import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {RankingSummary} from "@/src/components/RankingSummary";
 import {getCompetitors} from "@/src/db/queries/competitors";
 import {Category, Gender} from "@/src/db/schema";
+import {getAllHeats} from "@/src/db/queries/heats";
+import {RESULT_REVEAL_DELAY} from "@/src/lib/boulders-state";
+import {Countdown} from "@/src/components/Countdown";
 
 function pickLeaderboard({ranking, zawodnik, competitors}: {
     ranking: string | undefined;
@@ -64,6 +67,33 @@ export default async function CompetitionRanking({
     const competition = await getCompetition(slug);
     if (!competition) {
         notFound();
+    }
+
+    const allHeats = await getAllHeats(competition.id);
+    const harvestFestHeat = allHeats.find((heat) => heat.type === 'harvestFest');
+
+    const now = new Date();
+
+    const resultsHidden = harvestFestHeat !== undefined
+        && now.getTime() >= harvestFestHeat.startTime.getTime()
+        && now.getTime() < harvestFestHeat.endTime.getTime() + RESULT_REVEAL_DELAY;
+
+    if (resultsHidden) {
+        const revealTime = new Date(harvestFestHeat.endTime.getTime() + RESULT_REVEAL_DELAY);
+
+        return (
+            <Panel className={'flex flex-col text-center'}>
+                <h2 className={'text-xl'}>
+                    Trwa grupa <span className={'font-display text-4xl'}>dożynkowa</span>.
+                    Wyniki zostały ukryte.
+                </h2>
+                <Countdown
+                    steps={[{until: revealTime, label: 'Wyniki wrócą za:'}]}
+                    doneLabel={'Odśwież stronę, żeby zobaczyć wyniki.'}
+                    refreshOnDone
+                />
+            </Panel>
+        );
     }
 
     const competitors = session ? await getCompetitors(session.user.id, competition.id) : [];
@@ -125,7 +155,7 @@ export default async function CompetitionRanking({
                     <p>brak wyników.</p>
                 ) : (
                     <table className={'w-full text-sm'}>
-                        <thead className={`sticky top-[calc(env(safe-area-inset-top)+0.5rem)] 
+                        <thead className={`sticky top-[calc(env(safe-area-inset-top)+4rem)] 
                                            z-10 text-xs text-left uppercase tracking-wide`}>
                         <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
                                         *:last:rounded-r-full *:last:pr-4 

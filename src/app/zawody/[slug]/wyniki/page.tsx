@@ -72,7 +72,14 @@ export default async function CompetitionResults({
                         </p>
                         <p>Wyniki możesz wpisywać do {formatTime(closingTime)}</p>
                     </div>
-                    <Countdown startTime={competitor.startTime} endTime={competitor.endTime}/>
+                    <Countdown
+                        steps={[
+                            {until: openingTime, label: 'Do startu grupy pozostało:'},
+                            {until: endingTime, label: 'Do końca grupy pozostało:'},
+                            {until: closingTime, label: 'Do końca wpisywania wyników pozostało:'},
+                        ]}
+                        doneLabel={'Grupa zakończona.'}
+                    />
                     {competitors.length > 1 && (
                         <nav className={'flex gap-2'}>
                             {competitors.map((c) => (

@@ -1,59 +1,56 @@
 'use client';
 
-import {useEffect, useState} from "react";
-import {CLOSING_TIME} from "@/src/lib/boulders-state";
+import {useEffect} from "react";
+import {useNow} from "@/src/lib/hooks";
+import {useRouter} from "next/navigation";
+import {formatDuration} from "@/src/lib/dates";
 
-function formatDuration(ms: number) {
-    const totalSeconds = Math.floor(ms / 1000);
+const boxClass = 'flex items-center justify-between w-full rounded-xl p-2 my-4 bg-black text-white';
+const labelClass = 'pl-2 text-xl';
+const timeClass = 'pr-2 text-5xl font-display tabular-nums';
 
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-
-export function Countdown({startTime, endTime}: { startTime: Date, endTime: Date }) {
-    const [currentTime, setCurrentTime] = useState<Date | null>(null);
+export function Countdown({
+    steps, doneLabel, refreshOnDone
+}: {
+    steps: {until: Date, label: string}[],
+    doneLabel: string,
+    refreshOnDone?: boolean
+}) {
+    const router = useRouter();
+    const currentTime = useNow();
+    const step = currentTime && steps.find((s) => currentTime < s.until);
+    const isDone = currentTime !== null && step === undefined;
 
     useEffect(() => {
-        const updateTime = () => setCurrentTime(new Date());
-        updateTime();
-
-        const id = setInterval(updateTime, 1000);
-
-        return () => clearInterval(id);
-    }, []);
+        if (refreshOnDone && isDone) {
+            router.refresh();
+        }
+    }, [refreshOnDone, isDone, router]);
 
     if (!currentTime) {
         return (
-            <div className={'flex items-center justify-between w-full rounded-xl p-2 my-2 bg-black text-white'}>
+            <div className={boxClass} aria-hidden>
+                <p className={`${labelClass} invisible`}>{steps[0]?.label ?? doneLabel}</p>
+                <span className={`${timeClass} invisible`}>0:00:00</span>
             </div>
         );
     }
 
     let label: string;
-    let time: number | null;
+    let time: string | null;
 
-    if (currentTime < startTime) {
-        label = 'Do startu grupy pozostało:';
-        time = startTime.getTime() - currentTime.getTime();
-    } else if (currentTime < endTime) {
-        label = 'Do końca grupy pozostało:';
-        time = endTime.getTime() - currentTime.getTime();
-    } else if (currentTime.getTime() < endTime.getTime() + CLOSING_TIME) {
-        label = 'Do końca wpisywania wyników pozostało:';
-        time = endTime.getTime() + CLOSING_TIME - currentTime.getTime();
+    if (step) {
+        label = step.label;
+        time = formatDuration(step.until.getTime() - currentTime.getTime());
     } else {
-        label = 'Grupa zakończona.';
+        label = doneLabel;
         time = null;
     }
 
     return (
-        <div className={'flex items-center justify-between w-full rounded-xl p-2 my-4 bg-black text-white'}>
-            <p className={'pl-2 text-xl'}>{label}</p>
-            {time != null &&
-                <span className={'pr-2 text-5xl font-display tabular-nums'}>{formatDuration(time)}</span>}
+        <div className={boxClass}>
+            <p className={labelClass}>{label}</p>
+            {time !== null && <span className={timeClass}>{time}</span>}
         </div>
-    )
+    );
 }

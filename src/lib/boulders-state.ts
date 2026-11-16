@@ -1,5 +1,9 @@
 import type {getBouldersWithResults} from "@/src/db/queries/boulders";
 
+export const RESULT_ENTRY_MINUTES = 20;
+export const CLOSING_TIME = RESULT_ENTRY_MINUTES * 60 * 1000;
+export const RESULT_REVEAL_DELAY = 15 * 60 * 1000;
+
 export type Boulders = Awaited<ReturnType<typeof getBouldersWithResults>>;
 export type Boulder = Boulders[number];
 
@@ -31,9 +35,6 @@ export const statusStyle: Record<BoulderStatus, BouldersStyle> = {
     top: {label: 'Top', className: 'bg-[#ff3d8f] text-black'},
     flash: {label: 'Flesz', className: 'bg-black text-white'},
 };
-
-export const RESULT_ENTRY_MINUTES = 20;
-export const CLOSING_TIME = RESULT_ENTRY_MINUTES * 60 * 1000;
 
 export function getBoulderStatus(boulder: Boulder): BoulderStatus {
     if (boulder.isFlash) return 'flash';
