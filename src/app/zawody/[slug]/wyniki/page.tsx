@@ -1,21 +1,23 @@
 import {ReactNode} from "react";
 
-import Link from "next/link";
-import {auth} from "@/src/lib/auth";
-import {CLOSING_TIME} from "@/src/lib/boulders-state";
+import {BoulderStatus, CLOSING_TIME, getBoulderStatus} from "@/src/lib/boulders-state";
 import {getCompetition} from "@/src/db/queries/competitions";
+import {getAllHeats, getHarvestFestChanges} from "@/src/db/queries/heats";
+import {auth} from "@/src/lib/auth";
+import Link from "next/link";
 
 import {cn} from "@/src/lib/utils"
 import {headers} from "next/headers";
-import {notFound, redirect} from "next/navigation";
-import {getFirstName} from "@/src/lib/names";
-import {Panel, pressableClass} from "@/src/components/Panel";
-import {Countdown} from "@/src/components/Countdown";
 import {formatTime} from "@/src/lib/dates";
+import {getFirstName} from "@/src/lib/names";
+import {notFound, redirect} from "next/navigation";
+import {Countdown} from "@/src/components/Countdown";
 import {BouldersGrid} from "@/src/components/BouldersGrid";
 import {getCompetitors} from "@/src/db/queries/competitors";
-import {getBouldersWithResults} from "@/src/db/queries/boulders";
+import {Panel, pressableClass} from "@/src/components/Panel";
 import {SignOutButton} from "@/src/components/SignOutButton";
+import {getBouldersWithResults} from "@/src/db/queries/boulders";
+
 
 export default async function CompetitionResults({
     params, searchParams
@@ -42,15 +44,34 @@ export default async function CompetitionResults({
     const {zawodnik} = await searchParams;
     const competitor = competitors.find(c => c.id === Number(zawodnik)) ?? competitors[0];
 
+    const now = new Date().getTime();
+    const allHeats = await getAllHeats(competition.id);
+    const harvestFestHeat = allHeats.find((heat) => heat.type === 'harvestFest');
+    const isHarvestFestHeat = harvestFestHeat !== undefined && (
+        now >= harvestFestHeat.startTime.getTime() &&
+        now < harvestFestHeat.endTime.getTime() + CLOSING_TIME
+    );
+
+
+
     let gridSection: ReactNode;
 
     if (competitor) {
-
         const boulders = await getBouldersWithResults(competition.id, competitor.id);
-        const heatNumber = competitor.heatNumber ?? 'Dożynkowa';
-        const openingTime = competitor.startTime;
-        const endingTime = competitor.endTime;
+        let baseline: Record<number, BoulderStatus> | null = null;
+        const heatNumber = isHarvestFestHeat ? 'Dożynkowa' : competitor.heatNumber;
+        const activeHeat = isHarvestFestHeat ? harvestFestHeat : competitor;
+        const openingTime = activeHeat.startTime;
+        const endingTime = activeHeat.endTime;
         const closingTime = new Date(endingTime.getTime() + CLOSING_TIME);
+
+        if (isHarvestFestHeat) {
+            const changes = await getHarvestFestChanges(competitor.id);
+            const changesMap = new Map(changes.map((c) => [c.boulderId, c.previousStatus]));
+            baseline = Object.fromEntries(boulders.map(
+                (b) => [b.id, changesMap.get(b.id) ?? getBoulderStatus(b)]
+            ))
+        }
 
         gridSection = (
             <>
@@ -104,8 +125,9 @@ export default async function CompetitionResults({
                         key={competitor.id}
                         boulders={boulders}
                         competitorId={competitor.id}
-                        heatStartTime={competitor.startTime}
-                        heatEndTime={competitor.endTime}
+                        heatStartTime={activeHeat.startTime}
+                        heatEndTime={activeHeat.endTime}
+                        baseline={baseline}
                     />
                 </Panel>
             </>

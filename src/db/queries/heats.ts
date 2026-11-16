@@ -1,7 +1,7 @@
 import "server-only";
 
 import {db} from "@/src/db";
-import {heat} from "@/src/db/schema";
+import {harvestFestChange, heat} from "@/src/db/schema";
 
 import {cache} from "react";
 import {eq} from "drizzle-orm";
@@ -18,3 +18,12 @@ export const getAllHeats = cache(async (competitionId: number) => {
         .where(eq(heat.competitionId, competitionId))
         .orderBy(heat.startTime, heat.number)
 });
+
+export async function getHarvestFestChanges(competitorId: number) {
+    return db.select({
+        boulderId: harvestFestChange.boulderId,
+        previousStatus: harvestFestChange.previousStatus
+    })
+        .from(harvestFestChange)
+        .where(eq(harvestFestChange.competitorId, competitorId));
+}

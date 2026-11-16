@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import {eq, inArray} from 'drizzle-orm';
 import {db} from './index';
-import {boulder, competition, competitor, heat, result} from './schema';
+import {boulder, competition, competitor, harvestFestChange, heat, result} from './schema';
 
 const SLUG = 'test-krakem-all';
 const NAME = "TEST KRAK'EM ALL";
@@ -162,7 +162,71 @@ async function create(mode: string | undefined, lengthArg: string | undefined) {
     console.log(
         `  ranking ukryty: ${formatTime(schedule.harvestFest.start)} – ${formatTime(new Date(schedule.harvestFest.end.getTime() + RESULTS_REVEAL_DELAY))}`,
     );
-    console.log(`\nImport: npx tsx --conditions=react-server src/db/import-competit.ts <plik> ${SLUG}`);
+    console.log(`\nImport: npx tsx --conditions=react-server src/db/import-competit.ts <plik> ${created.id}`);
+}
+
+type Flags = {isZone: boolean; isTop: boolean; isFlash: boolean};
+
+const FLAGS: Record<'zone' | 'top' | 'flash', Flags> = {
+    zone: {isZone: true, isTop: false, isFlash: false},
+    top: {isZone: true, isTop: true, isFlash: false},
+    flash: {isZone: true, isTop: true, isFlash: true},
+};
+
+const CHANCES: [maxGrade: number, flash: number, top: number, zone: number][] = [
+    [3, 0.6, 0.3, 0.05],
+    [5, 0.35, 0.35, 0.15],
+    [7, 0.1, 0.3, 0.3],
+    [9, 0.02, 0.1, 0.3],
+];
+
+function randomFlags(grade: number): Flags | null {
+    const [, flash, top, zone] = CHANCES.find(([maxGrade]) => grade <= maxGrade) ?? [0, 0, 0, 0];
+    const roll = Math.random();
+    if (roll < flash) return FLAGS.flash;
+    if (roll < flash + top) return FLAGS.top;
+    if (roll < flash + top + zone) return FLAGS.zone;
+    return null;
+}
+
+const INSERT_BATCH_SIZE = 5000;
+
+async function seedResults() {
+    const found = await findTestCompetition();
+    if (!found) {
+        throw new Error(`Nie ma zawodów testowych (${SLUG}). Najpierw: create`);
+    }
+
+    const competitors = await db
+        .select({id: competitor.id})
+        .from(competitor)
+        .where(eq(competitor.competitionId, found.id));
+    const competitorIds = competitors.map((c) => c.id);
+
+    if (competitorIds.length === 0) {
+        throw new Error('Zawody testowe nie mają zawodników. Najpierw zrób import.');
+    }
+
+    const boulders = await db
+        .select({id: boulder.id, grade: boulder.grade})
+        .from(boulder)
+        .where(eq(boulder.competitionId, found.id));
+
+    await db.delete(harvestFestChange).where(inArray(harvestFestChange.competitorId, competitorIds));
+    await db.delete(result).where(inArray(result.competitorId, competitorIds));
+
+    const rows = competitorIds.flatMap((competitorId) =>
+        boulders.flatMap((b) => {
+            const flags = randomFlags(b.grade);
+            return flags ? [{competitorId, boulderId: b.id, ...flags}] : [];
+        }),
+    );
+
+    for (let i = 0; i < rows.length; i += INSERT_BATCH_SIZE) {
+        await db.insert(result).values(rows.slice(i, i + INSERT_BATCH_SIZE));
+    }
+
+    console.log(`Wylosowano ${rows.length} wyników dla ${competitorIds.length} zawodników (stare wyniki i zmiany z Dożynkowej usunięte).`);
 }
 
 async function remove() {
@@ -196,10 +260,12 @@ async function main() {
     const command = process.argv[2];
     if (command === 'create') {
         await create(process.argv[3], process.argv[4]);
+    } else if (command === 'wyniki') {
+        await seedResults();
     } else if (command === 'remove') {
         await remove();
     } else {
-        throw new Error('Podaj polecenie: create, create harmonogram, create dozynkowa [minuty] albo remove');
+        throw new Error('Podaj polecenie: create, create harmonogram, create dozynkowa [minuty], wyniki albo remove');
     }
 }
 
