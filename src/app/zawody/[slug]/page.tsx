@@ -137,7 +137,7 @@ export default async function CompetitionRanking({
             ))}
             <Panel className={'flex flex-col items-center gap-4'}>
                 <h2 className={'font-display text-6xl'}>{LEADERBOARDS[leaderboardType].label}</h2>
-                <nav className={'flex flex-wrap gap-3'}>
+                <nav className={'flex flex-wrap gap-2'}>
                     {LEADERBOARD_TYPES.map((key) => (
                         <Link
                             key={key}
