@@ -14,12 +14,12 @@ export default async function Info({params}: {params: {slug: string}}) {
                 <div className={'grid grid-cols-2 gap-4'}>
                     <StatTile
                         label={'Zona'}
-                        value={'stopień × 3'}
+                        value={'wycena × 3'}
                         className={statusStyle['zone'].className}
                     />
                     <StatTile
                         label={'Top i Flesz'}
-                        value={'stopień × 4'}
+                        value={'wycena × 4'}
                         className={statusStyle['top'].className}
                     />
                 </div>
