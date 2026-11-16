@@ -17,9 +17,10 @@ import {Button} from "@/src/components/ui/button";
 type LoginStatus = 'idle' | 'sending' | 'sent' | 'error';
 
 export function LoginForm({
-    callbackURL
+    callbackURL, linkExpired
 } : {
     callbackURL: string;
+    linkExpired: boolean;
 }) {
     const [mail, setMail] = useState("");
     const [status, setStatus] = useState<LoginStatus>('idle');
@@ -29,10 +30,12 @@ export function LoginForm({
 
         setStatus('sending');
 
+        const errorParams = new URLSearchParams({error: 'link', next: callbackURL });
+
         const {error} = await authClient.signIn.magicLink({
             email: mail.trim(),
             callbackURL,
-            errorCallbackURL: "/error"
+            errorCallbackURL: `/login?${errorParams}`
         });
 
         if (error) {
@@ -74,6 +77,13 @@ export function LoginForm({
     return (
         <Panel>
             <h1 className={'font-display text-6xl pb-4'}>Zaloguj się</h1>
+            {linkExpired && (
+                <p
+                    className={'rounded-xl border-2 border-black bg-[#ffd6e7] px-3 py-2 text-sm'}
+                >
+                    Ten link został już użyty albo wygasł. Wpisz maila, wyślemy nowy.
+                </p>
+            )}
             <form className={'flex flex-col gap-2 w-full max-w-sm'} onSubmit={handleSubmit}>
                 <FieldLabel htmlFor={"email"} className={'text-lg'}>
                     podaj maila.

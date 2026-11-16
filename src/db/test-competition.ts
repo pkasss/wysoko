@@ -162,7 +162,7 @@ async function create(mode: string | undefined, lengthArg: string | undefined) {
     console.log(
         `  ranking ukryty: ${formatTime(schedule.harvestFest.start)} – ${formatTime(new Date(schedule.harvestFest.end.getTime() + RESULTS_REVEAL_DELAY))}`,
     );
-    console.log(`\nImport: npx tsx --conditions=react-server src/db/import-competit.ts <plik> ${created.id}`);
+    console.log(`\nImport: npx tsx --conditions=react-server src/db/import-competit.ts <plik> ${SLUG}`);
 }
 
 async function remove() {

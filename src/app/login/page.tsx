@@ -8,13 +8,13 @@ import {LoginForm} from "@/src/components/LoginForm";
 export default async function Login({
     searchParams,
 } : {
-    searchParams: Promise<{next?: string}>;
+    searchParams: Promise<{next?: string, error?: string}>;
 }) {
     const session = await auth.api.getSession({
         headers: await headers()
     });
 
-    const {next} = await searchParams;
+    const {next, error} = await searchParams;
     const callbackURL = getSafeRedirect(next);
 
     if (session) {
@@ -23,7 +23,7 @@ export default async function Login({
 
     return (
         <main className="flex min-h-dvh items-center justify-center p-4">
-            <LoginForm callbackURL={callbackURL}/>
+            <LoginForm callbackURL={callbackURL} linkExpired={error === 'link'}/>
         </main>
     )
 }
