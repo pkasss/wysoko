@@ -30,7 +30,7 @@ export function LoginForm({
 
         setStatus('sending');
 
-        const errorParams = new URLSearchParams({error: 'link', next: callbackURL });
+        const errorParams = new URLSearchParams({ next: callbackURL });
 
         const {error} = await authClient.signIn.magicLink({
             email: mail.trim(),

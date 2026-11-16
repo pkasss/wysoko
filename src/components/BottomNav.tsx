@@ -21,7 +21,7 @@ export function BottomNav({slug}: { slug: string }) {
         Number.isInteger(Number(rawCompetitor)) ? Number(rawCompetitor) : null;
 
     return (
-        <nav className={'fixed inset-x-0 bottom-0 flex justify-center px-4 pb-4'}>
+        <nav className={'fixed inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-4'}>
             <Panel className={'flex w-full max-w-lg rounded-full gap-1 p-1.5'}>
                 {links.map(({label, href, icon: Icon}) => (
                     <Link

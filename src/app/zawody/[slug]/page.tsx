@@ -155,7 +155,7 @@ export default async function CompetitionRanking({
                     <p>brak wyników.</p>
                 ) : (
                     <table className={'w-full text-sm'}>
-                        <thead className={`sticky top-[calc(env(safe-area-inset-top)+4rem)] 
+                        <thead className={`sticky top-[calc(env(safe-area-inset-top)+var(--header-height)+1.5rem)] 
                                            z-10 text-xs text-left uppercase tracking-wide`}>
                         <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
                                         *:last:rounded-r-full *:last:pr-4 

@@ -29,7 +29,8 @@ export default async function CompetitionLayout({
 
     return (
         <main className={'flex flex-col gap-3 mx-auto max-w-xl px-4 pt-2 pb-28'}>
-            <div className={'sticky top-0 z-20 -mx-4 flex justify-center bg-[whitesmoke]/90 px-4 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 backdrop-blur'}>
+            <div className={`sticky top-0 z-20 -mx-4 flex justify-center bg-[whitesmoke]/90 px-4
+                             pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 backdrop-blur`}>
                 <Image
                     src={'/avatar-logo-full.svg'}
                     alt={'Avatar Climbing'}

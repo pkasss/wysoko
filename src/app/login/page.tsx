@@ -23,7 +23,7 @@ export default async function Login({
 
     return (
         <main className="flex min-h-dvh items-center justify-center p-4">
-            <LoginForm callbackURL={callbackURL} linkExpired={error === 'link'}/>
+            <LoginForm callbackURL={callbackURL} linkExpired={error !== undefined}/>
         </main>
     )
 }
