@@ -1,5 +1,7 @@
 import Link from "next/link";
 import {auth} from "@/src/lib/auth";
+import {getAllHeats} from "@/src/db/queries/heats";
+import {RESULT_REVEAL_DELAY} from "@/src/lib/boulders-state";
 import {getCompetition} from "@/src/db/queries/competitions";
 import {
     DEFAULT_LEADERBOARD,
@@ -7,8 +9,9 @@ import {
     LEADERBOARD_TYPES,
     levelStyle,
     isLeaderboardType, getLevel,
-    LeaderboardType
+    LeaderboardType, Level, FINALISTS_PER_LEVEL
 } from "@/src/lib/ranking";
+import {Category, Gender} from "@/src/db/schema";
 import {Fragment} from "react";
 import {cn} from "@/src/lib/utils";
 import {headers} from "next/headers";
@@ -17,10 +20,8 @@ import {Panel, pressableClass} from "@/src/components/Panel";
 import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {RankingSummary} from "@/src/components/RankingSummary";
 import {getCompetitors} from "@/src/db/queries/competitors";
-import {Category, Gender} from "@/src/db/schema";
-import {getAllHeats} from "@/src/db/queries/heats";
-import {RESULT_REVEAL_DELAY} from "@/src/lib/boulders-state";
 import {Countdown} from "@/src/components/Countdown";
+import {Star} from "lucide-react";
 
 function pickLeaderboard({ranking, zawodnik, competitors}: {
     ranking: string | undefined;
@@ -109,12 +110,23 @@ export default async function CompetitionRanking({
     for (const result of leaderboard) {
         placeCounts.set(result.place, (placeCounts.get(result.place) ?? 0) + 1);
     }
+
+    const levelFirstPlace = new Map<Level, number>();
+
     const rows = leaderboard.map((row) => {
         const tied = placeCounts.get(row.place) ?? 0;
         const beaten = leaderboard.length - (row.place - 1) - tied;
         const level = category === 'adult' ? getLevel(beaten, leaderboard.length) : null;
 
-        return {...row, level};
+        if (level && !levelFirstPlace.has(level)) {
+            levelFirstPlace.set(level, row.place);
+        }
+
+        const placeInLevel = level ? row.place - (levelFirstPlace.get(level) ?? row.place) + 1 : null;
+        const isFinalist = level !== null && placeInLevel !== null &&
+            placeInLevel <= FINALISTS_PER_LEVEL[level];
+
+        return {...row, level, isFinalist};
     });
 
     return (
@@ -200,7 +212,10 @@ export default async function CompetitionRanking({
                                             'bg-black text-white border-2 border-black')}
                                     >
                                         <td className={'pl-2 font-display text-2xl'}>{row.place}</td>
-                                        <td className={'font-semibold'}>{row.name}</td>
+                                        <td className={'font-semibold'}>
+                                            {row.name}
+                                            {row.isFinalist && <span className={'px-3'}>🏁</span>}
+                                        </td>
                                         <td className={'tabular-nums text-center'}>{row.pointsSum}</td>
                                         <td className={'pr-2 tabular-nums text-center'}>{row.flashCount}</td>
                                     </tr>

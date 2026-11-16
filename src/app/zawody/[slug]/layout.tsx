@@ -43,7 +43,7 @@ export default async function CompetitionLayout({
             <Panel className={'w-fit px-3 py-1 text-lg uppercase'}>
                 {competitionDate}
             </Panel>
-            <Panel className={'text-6xl font-display'}>{competition.name}</Panel>
+            <Panel className={'text-7xl font-display'}>{competition.name}</Panel>
             {children}
             {session && (
                 <BottomNav slug={slug}/>

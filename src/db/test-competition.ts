@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import {eq, inArray} from 'drizzle-orm';
+import {and, eq, inArray, notInArray, sql} from 'drizzle-orm';
 import {db} from './index';
 import {boulder, competition, competitor, harvestFestChange, heat, result} from './schema';
 
@@ -229,6 +229,39 @@ async function seedResults() {
     console.log(`Wylosowano ${rows.length} wyników dla ${competitorIds.length} zawodników (stare wyniki i zmiany z Dożynkowej usunięte).`);
 }
 
+function emailsToKeep() {
+    const listed = (process.env.TEST_KEEP_EMAILS ?? '').split(',');
+    const mine = process.env.SEED_MY_EMAIL ?? '';
+    return [...listed, mine]
+        .map((email) => email.trim().toLocaleLowerCase('pl'))
+        .filter((email) => email.length > 0);
+}
+
+async function anonymize() {
+    const found = await findTestCompetition();
+    if (!found) {
+        throw new Error(`Nie ma zawodów testowych (${SLUG}).`);
+    }
+
+    const keep = emailsToKeep();
+    if (keep.length === 0) {
+        throw new Error('Podaj maile testerów do zostawienia: TEST_KEEP_EMAILS="a@x.pl,b@y.pl" (albo ustaw SEED_MY_EMAIL)');
+    }
+
+    const anonymized = await db
+        .update(competitor)
+        .set({
+            name: sql`'Zawodnik ' || ${competitor.id}`,
+            email: sql`'zawodnik' || ${competitor.id} || '@example.com'`,
+            birthDate: sql`date_trunc('year', ${competitor.birthDate})::date`,
+            userId: null,
+        })
+        .where(and(eq(competitor.competitionId, found.id), notInArray(competitor.email, keep)))
+        .returning({id: competitor.id});
+
+    console.log(`Zanonimizowano ${anonymized.length} zawodników. Zostawieni bez zmian: ${keep.join(', ')}`);
+}
+
 async function remove() {
     const found = await findTestCompetition();
     if (!found) {
@@ -260,12 +293,14 @@ async function main() {
     const command = process.argv[2];
     if (command === 'create') {
         await create(process.argv[3], process.argv[4]);
+    } else if (command === 'anonimizuj') {
+        await anonymize();
     } else if (command === 'wyniki') {
         await seedResults();
     } else if (command === 'remove') {
         await remove();
     } else {
-        throw new Error('Podaj polecenie: create, create harmonogram, create dozynkowa [minuty], wyniki albo remove');
+        throw new Error('Podaj polecenie: create, create harmonogram, create dozynkowa [minuty], wyniki, anonimizuj albo remove');
     }
 }
 
