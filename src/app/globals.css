@@ -142,23 +142,3 @@
     70% { transform: scale(0.95) rotate(2deg); }
   }
 }
-
-::view-transition-group(*),
-::view-transition-old(*),
-::view-transition-new(*) {
-  animation-duration: 400ms;
-}
-
-::view-transition-group(site-header),
-::view-transition-group(bottom-nav) {
-  animation: none;
-  z-index: 100;
-}
-::view-transition-old(site-header),
-::view-transition-old(bottom-nav) {
-  display: none;
-}
-::view-transition-new(site-header),
-::view-transition-new(bottom-nav) {
-  animation: none;
-}
