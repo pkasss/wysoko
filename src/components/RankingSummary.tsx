@@ -24,7 +24,7 @@ export function RankingSummary({
     }
 
     return (
-        <Panel>
+        <section>
             <p>{getFirstName(row.name)}, jesteś na</p>
             <p className={'flex items-baseline gap-2'}>
                 <span className={'font-display text-7xl leading-none'}>{row.place}. miejscu</span>
@@ -49,6 +49,6 @@ export function RankingSummary({
                     />
                 )}
             </div>
-        </Panel>
+        </section>
     )
 }

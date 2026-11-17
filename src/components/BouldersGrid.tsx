@@ -26,6 +26,8 @@ export function BouldersGrid({
     heatEndTime: Date;
     baseline: Record<number, BoulderStatus> | null;
 }) {
+    const [lastTapped, setLastTapped] = useState<number | null>(null);
+    const [tapCount, setTapCount] = useState(0);
     const [errorCode, setErrorCode] = useState<SaveResultCode | null>(null)
     const [optimisticBoulders, setOptimisticBoulder] = useOptimistic(
         boulders,
@@ -38,6 +40,9 @@ export function BouldersGrid({
     const [, startTransition] = useTransition();
 
     function handleClick(boulder: Boulder) {
+        setLastTapped(boulder.id);
+        setTapCount((count) => count + 1);
+
         const now = new Date().getTime();
         if (now < heatStartTime.getTime()) {
             setErrorCode('not_started');
@@ -105,15 +110,20 @@ export function BouldersGrid({
                         }
                         className={cn(`border-2 border-black shadow-[3px_3px_0_#000] rounded-xl h-16 
                                        active:translate-x-0.75 active:translate-y-0.75 active:shadow-none 
-                                       transition-transform disabled:opacity-30 disabled:shadow-none`,
+                                       transition-transform duration-300 disabled:opacity-30 disabled:shadow-none`,
                                        statusStyle[getBoulderStatus(boulder)].className,
                                        changedIds.has(boulder.id) && `-translate-x-0.5 -translate-y-0.5 
                                        shadow-[5px_5px_0_#000] border-4`)
 
                         }
                     >
-                        <span className={'block text-2xl font-bold'}>{boulder.number}</span>
-                        <span className={'block text-xs'}>{boulder.grade}AV</span>
+                        <span
+                            key={lastTapped === boulder.id ? tapCount : 0}
+                            className={cn('block', lastTapped === boulder.id && 'motion-safe:animate-pop')}
+                        >
+                            <span className={'block text-2xl font-bold'}>{boulder.number}</span>
+                            <span className={'block text-xs'}>{boulder.grade}AV</span>
+                        </span>
                     </button>
                 ))}
             </div>

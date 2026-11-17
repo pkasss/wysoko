@@ -134,3 +134,31 @@
   --font-sans: var(--font-inter);
 }
 
+@theme {
+  --animate-pop: pop 300ms ease-out;
+
+  @keyframes pop {
+    40% { transform: scale(1.25) rotate(-6deg); }
+    70% { transform: scale(0.95) rotate(2deg); }
+  }
+}
+
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 400ms;
+}
+
+::view-transition-group(site-header),
+::view-transition-group(bottom-nav) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header),
+::view-transition-old(bottom-nav) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(bottom-nav) {
+  animation: none;
+}

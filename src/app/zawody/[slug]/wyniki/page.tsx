@@ -14,7 +14,7 @@ import {notFound, redirect} from "next/navigation";
 import {Countdown} from "@/src/components/Countdown";
 import {BouldersGrid} from "@/src/components/BouldersGrid";
 import {getCompetitors} from "@/src/db/queries/competitors";
-import {Panel, pressableClass} from "@/src/components/Panel";
+import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
 import {SignOutButton} from "@/src/components/SignOutButton";
 import {getBouldersWithResults} from "@/src/db/queries/boulders";
 
@@ -75,7 +75,7 @@ export default async function CompetitionResults({
 
         gridSection = (
             <>
-                <Panel>
+                <Panel className={cn(enterClass, 'delay-100')}>
                     <div className={'flex items-start justify-between gap-4'}>
                         <div className={'flex flex-col'}>
                             <p className={'text-lg'}>Cześć,</p>
@@ -120,7 +120,7 @@ export default async function CompetitionResults({
                         </nav>
                     )}
                 </Panel>
-                <Panel>
+                <Panel className={cn(enterClass, 'delay-200')}>
                     <BouldersGrid
                         key={competitor.id}
                         boulders={boulders}
@@ -134,7 +134,7 @@ export default async function CompetitionResults({
         )
     } else {
         gridSection = (
-            <Panel className={'flex flex-col text-center gap-2'}>
+            <Panel className={cn(enterClass, 'delay-100 flex flex-col text-center gap-2')}>
                 <h1 className={'font-display text-4xl'}>Nie ma Cię na liście uczestników.</h1>
                 <p>
                     Zalogowano jako:{' '}

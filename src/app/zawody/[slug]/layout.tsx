@@ -3,6 +3,7 @@ import Image from "next/image";
 import {auth} from "@/src/lib/auth";
 import {getCompetition} from "@/src/db/queries/competitions";
 import {headers} from "next/headers";
+import {ViewTransition} from "react";
 import {notFound} from "next/navigation";
 import {Panel} from "@/src/components/Panel";
 import {BottomNav} from "@/src/components/BottomNav";
@@ -29,7 +30,9 @@ export default async function CompetitionLayout({
 
     return (
         <main className={'flex flex-col gap-3 mx-auto max-w-xl px-4 pt-2 pb-28'}>
-            <div className={`sticky top-0 z-20 -mx-4 flex justify-center bg-[whitesmoke]/90 px-4
+            <div
+                style={{viewTransitionName: 'site-header'}}
+                className={`sticky top-0 z-20 -mx-4 flex justify-center bg-[whitesmoke]/90 px-4
                              pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 backdrop-blur`}>
                 <Image
                     src={'/avatar-logo-full.svg'}
@@ -40,11 +43,11 @@ export default async function CompetitionLayout({
                     className={'h-20 w-auto'}
                 />
             </div>
-            <Panel className={'w-fit px-3 py-1 text-lg uppercase'}>
-                {competitionDate}
-            </Panel>
-            <Panel className={'text-7xl font-display'}>{competition.name}</Panel>
-            {children}
+                <Panel className={'w-fit px-3 py-1 text-lg uppercase'}>
+                    {competitionDate}
+                </Panel>
+                <Panel className={'text-7xl font-display'}>{competition.name}</Panel>
+                {children}
             {session && (
                 <BottomNav slug={slug}/>
             )}

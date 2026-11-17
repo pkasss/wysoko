@@ -1,7 +1,8 @@
-import {Panel} from "@/src/components/Panel";
-import {StatTile} from "@/src/components/StatTile";
 import {statusStyle} from "@/src/lib/boulders-state";
+import {enterClass, Panel} from "@/src/components/Panel";
 import {HeatSchedule} from "@/src/components/HeatSchedule";
+import {StatTile} from "@/src/components/StatTile";
+import {cn} from "@/src/lib/utils";
 
 export default async function Info({params}: {params: {slug: string}}) {
 
@@ -9,7 +10,7 @@ export default async function Info({params}: {params: {slug: string}}) {
 
     return (
         <>
-            <Panel className={'flex flex-col gap-4 w-full'}>
+            <Panel className={cn(enterClass, 'delay-100 flex flex-col gap-4 w-full')}>
                 <h2 className={'font-display text-4xl'}>Punktacja</h2>
                 <div className={'grid grid-cols-2 gap-4'}>
                     <StatTile
@@ -29,7 +30,9 @@ export default async function Info({params}: {params: {slug: string}}) {
                     <li>Wyniki wpisujesz w trakcie swojej grupy i 20 minut po jej zakończeniu.</li>
                 </ul>
             </Panel>
-            <HeatSchedule slug={slug}/>
+            <Panel className={cn(enterClass, 'delay-200 flex flex-col gap-4')}>
+                <HeatSchedule slug={slug}/>
+            </Panel>
         </>
     )
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {auth} from "@/src/lib/auth";
 import {getAllHeats} from "@/src/db/queries/heats";
-import {RESULT_REVEAL_DELAY} from "@/src/lib/boulders-state";
+import {CLOSING_TIME} from "@/src/lib/boulders-state";
 import {getCompetition} from "@/src/db/queries/competitions";
 import {
     DEFAULT_LEADERBOARD,
@@ -16,7 +16,7 @@ import {Fragment} from "react";
 import {cn} from "@/src/lib/utils";
 import {headers} from "next/headers";
 import {notFound} from "next/navigation";
-import {Panel, pressableClass} from "@/src/components/Panel";
+import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
 import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {RankingSummary} from "@/src/components/RankingSummary";
 import {getCompetitors} from "@/src/db/queries/competitors";
@@ -76,19 +76,19 @@ export default async function CompetitionRanking({
 
     const resultsHidden = harvestFestHeat !== undefined
         && now.getTime() >= harvestFestHeat.startTime.getTime()
-        && now.getTime() < harvestFestHeat.endTime.getTime() + RESULT_REVEAL_DELAY;
+        && now.getTime() < harvestFestHeat.endTime.getTime() + CLOSING_TIME;
 
     if (resultsHidden) {
-        const revealTime = new Date(harvestFestHeat.endTime.getTime() + RESULT_REVEAL_DELAY);
+        const revealTime = new Date(harvestFestHeat.endTime.getTime() + CLOSING_TIME);
 
         return (
-            <Panel className={'flex flex-col text-center'}>
+            <Panel className={cn(enterClass, 'delay-100 flex flex-col text-center')}>
                 <h2 className={'text-xl'}>
                     Trwa grupa <span className={'font-display text-4xl'}>dożynkowa</span>.
                     Wyniki zostały ukryte.
                 </h2>
                 <Countdown
-                    steps={[{until: revealTime, label: 'Wyniki wrócą za:'}]}
+                    steps={[{until: revealTime, label: 'Ranking wróci za:'}]}
                     doneLabel={'Odśwież stronę, żeby zobaczyć wyniki.'}
                     refreshOnDone
                 />
@@ -133,20 +133,21 @@ export default async function CompetitionRanking({
             {!session && (
                 <Link
                     href={`/login?next=/zawody/${competition.slug}/wyniki`}
-                    className={cn(pressableClass, 'text-center text-4xl block')}
+                    className={cn(enterClass, pressableClass, 'delay-100 text-center text-4xl block')}
                 >
                     Startujesz? Zaloguj się!
                 </Link>
             )}
             {myRows.map((row) => (
-                <RankingSummary
-                    key={row.competitorId}
-                    row={row}
-                    total={leaderboard.length}
-                    above={leaderboard.findLast((other) => other.place < row.place)}
-                />
+                <Panel key={row.competitorId} className={cn(enterClass, 'delay-100')}>
+                    <RankingSummary
+                        row={row}
+                        total={leaderboard.length}
+                        above={leaderboard.findLast((other) => other.place < row.place)}
+                    />
+                </Panel>
             ))}
-            <Panel className={'flex flex-col items-center gap-4'}>
+            <Panel className={cn(enterClass, 'delay-200 flex flex-col items-center gap-4')}>
                 <h2 className={'font-display text-6xl'}>{LEADERBOARDS[leaderboardType].label}</h2>
                 <nav className={'flex flex-wrap gap-2'}>
                     {LEADERBOARD_TYPES.map((key) => (

@@ -1,6 +1,5 @@
 import {getAllHeats} from "@/src/db/queries/heats";
 import {getCompetition} from "@/src/db/queries/competitions";
-import {Panel} from "@/src/components/Panel";
 import {formatDate, formatTime} from "@/src/lib/dates";
 
 export async function HeatSchedule({slug}: {slug: string}) {
@@ -16,7 +15,7 @@ export async function HeatSchedule({slug}: {slug: string}) {
     }
 
     return (
-        <Panel className={'flex flex-col gap-4'}>
+        <>
             <h1 className={'font-display text-4xl'}>Grupy</h1>
             {[...heatsByDay].map(([day, heats]) => (
                 <section key={day}>
@@ -31,6 +30,6 @@ export async function HeatSchedule({slug}: {slug: string}) {
                     ))}
                 </section>
             ))}
-        </Panel>
+        </>
     )
 }
