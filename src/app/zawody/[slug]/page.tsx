@@ -16,11 +16,12 @@ import {Fragment} from "react";
 import {cn} from "@/src/lib/utils";
 import {headers} from "next/headers";
 import {notFound} from "next/navigation";
-import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
+import {Countdown} from "@/src/components/Countdown";
+import {AutoRefresh} from "@/src/components/AutoRefresh";
+import {getCompetitors} from "@/src/db/queries/competitors";
 import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {RankingSummary} from "@/src/components/RankingSummary";
-import {getCompetitors} from "@/src/db/queries/competitors";
-import {Countdown} from "@/src/components/Countdown";
+import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
 
 function pickLeaderboard({ranking, zawodnik, competitors}: {
     ranking: string | undefined;
@@ -130,6 +131,7 @@ export default async function CompetitionRanking({
 
     return (
         <>
+            <AutoRefresh/>
             {!session && (
                 <Link
                     href={`/login?next=/zawody/${competition.slug}/wyniki`}
