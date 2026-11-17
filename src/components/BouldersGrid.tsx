@@ -48,7 +48,8 @@ export function BouldersGrid({
             return;
         }
         startTransition(async () => {
-            const nextStatus = getNextStatus(getBoulderStatus(boulder), baseline?.[boulder.id]);
+            const base = baseline?.[boulder.id];
+            const nextStatus = getNextStatus(getBoulderStatus(boulder), base, base !== 'zone' && base !== 'top');
 
             setOptimisticBoulder({boulderId: boulder.id, status: nextStatus});
 
@@ -58,13 +59,13 @@ export function BouldersGrid({
     }
 
     const toppedBoulders = optimisticBoulders.filter((boulder: Boulder) => boulder.isTop)
-    const changedIds = new Set(
-        baseline ?
-            optimisticBoulders
-                .filter((boulder) => getBoulderStatus(boulder) !== baseline[boulder.id])
-                .map((boulder) => boulder.id)
-            : []
-    );
+
+    const changedBoulders = baseline
+        ? optimisticBoulders.filter((boulder) => getBoulderStatus(boulder) !== baseline[boulder.id])
+        : [];
+    const changedIds = new Set(changedBoulders.map((boulder) => boulder.id));
+    const changedNumbers = changedBoulders.map((boulder) => boulder.number);
+
     const limitReached = changedIds.size >= HARVEST_FEST_CHANGE_LIMIT;
 
     return (
@@ -79,7 +80,12 @@ export function BouldersGrid({
             </div>
             <StatusLegend/>
             {baseline && (
-                <p>Zmiany w grupie Dożynkowej: {changedIds.size}/{HARVEST_FEST_CHANGE_LIMIT}</p>
+                <p>
+                    Zmiany w grupie Dożynkowej: {changedIds.size}/{HARVEST_FEST_CHANGE_LIMIT}{' '}
+                    {changedNumbers.length > 0 && <span className={'font-semibold'}>
+                        (Bouldery nr: {changedNumbers.join(',')})
+                    </span>}
+                </p>
             )}
             {errorCode && <p
                 className={'flex flex-col text-center rounded-xl border-2 border-black bg-[#ffd6e7] px-3 py-2'}
@@ -92,11 +98,18 @@ export function BouldersGrid({
                         key={boulder.id}
                         type="button"
                         onClick={() => handleClick(boulder)}
-                        disabled={limitReached && !changedIds.has(boulder.id)}
+                        disabled={
+                            limitReached && !changedIds.has(boulder.id) ||
+                            baseline?.[boulder.id] === 'flash' ||
+                            baseline?.[boulder.id] === 'top'
+                        }
                         className={cn(`border-2 border-black shadow-[3px_3px_0_#000] rounded-xl h-16 
                                        active:translate-x-0.75 active:translate-y-0.75 active:shadow-none 
                                        transition-transform disabled:opacity-30 disabled:shadow-none`,
-                                       statusStyle[getBoulderStatus(boulder)].className)
+                                       statusStyle[getBoulderStatus(boulder)].className,
+                                       changedIds.has(boulder.id) && `-translate-x-0.5 -translate-y-0.5 
+                                       shadow-[5px_5px_0_#000] border-4`)
+
                         }
                     >
                         <span className={'block text-2xl font-bold'}>{boulder.number}</span>

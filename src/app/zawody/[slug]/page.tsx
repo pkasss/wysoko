@@ -21,7 +21,6 @@ import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {RankingSummary} from "@/src/components/RankingSummary";
 import {getCompetitors} from "@/src/db/queries/competitors";
 import {Countdown} from "@/src/components/Countdown";
-import {Star} from "lucide-react";
 
 function pickLeaderboard({ranking, zawodnik, competitors}: {
     ranking: string | undefined;

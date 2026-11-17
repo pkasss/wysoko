@@ -33,7 +33,7 @@ export const competitor = pgTable('competitor', {
             .references(() => heat.id)
             .notNull(),
         competitionId: integer()
-            .references(() => competition.id)
+            .references(() => competition.id, {onDelete: "cascade"})
             .notNull()
     }, (table) => [
         unique().on(table.externalId, table.competitionId)
@@ -45,7 +45,7 @@ export const heat = pgTable('heat', {
         number: integer(),
         type: heatType().notNull(),
         competitionId: integer()
-            .references(() => competition.id)
+            .references(() => competition.id, {onDelete: "cascade"})
             .notNull(),
         startTime: timestamp({withTimezone: true}).notNull(),
         endTime: timestamp({withTimezone: true}).notNull(),
@@ -69,7 +69,7 @@ export const boulder = pgTable('boulder', {
         number: integer().notNull(),
         grade: integer().notNull(),
         competitionId: integer()
-            .references(() => competition.id)
+            .references(() => competition.id, {onDelete: "cascade"})
             .notNull()
     },
     (table) => [
@@ -79,13 +79,13 @@ export const boulder = pgTable('boulder', {
 
 export const result = pgTable('result', {
         id: integer().primaryKey().generatedAlwaysAsIdentity(),
-        competitorId: integer()
+    competitorId: integer()
             .references(() => competitor.id, {onDelete: "cascade"})
             .notNull(),
-        boulderId: integer()
-            .references(() => boulder.id)
-            .notNull(),
-        isZone: boolean().default(false).notNull(),
+    boulderId: integer()
+        .references(() => boulder.id, {onDelete: "cascade"})
+        .notNull(),
+    isZone: boolean().default(false).notNull(),
         isTop: boolean().default(false).notNull(),
         isFlash: boolean().default(false).notNull(),
         updatedAt: timestamp({withTimezone: true}).defaultNow().notNull(),

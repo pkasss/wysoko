@@ -21,7 +21,9 @@ export type SaveResultCode =
     'not_started' |
     'closed' |
     'harvest_fest_lower' |
+    'harvest_fest_flash' |
     'harvest_fest_limit';
+
 export type SaveResultResponse = {ok: true} | {ok: false, reason: SaveResultCode};
 export const saveResultResponseMessage: Record<SaveResultCode, string> = {
     invalid: 'Coś poszło nie tak.',
@@ -31,6 +33,7 @@ export const saveResultResponseMessage: Record<SaveResultCode, string> = {
     not_started: 'Grupa jeszcze nie wystartowała.',
     closed: 'Minęło 20 minut od końca grupy.',
     harvest_fest_lower: 'W grupie Dożynkowej nie można obniżyć wyniku',
+    harvest_fest_flash: 'Flesz był możliwy tylko za pierwszym razem ;)',
     harvest_fest_limit: 'Limit 2 zmian w grupie Dożynkowej wykorzystany'
 }
 
@@ -63,10 +66,15 @@ export function isBoulderStatus(value: string): value is BoulderStatus {
     return (BOULDER_STATUSES as readonly string[]).includes(value);
 }
 
-export function getNextStatus(status: BoulderStatus, minStatus: BoulderStatus = 'none'): BoulderStatus {
+export function getNextStatus(
+    status: BoulderStatus, minStatus: BoulderStatus = 'none', allowFlash: boolean = true
+): BoulderStatus {
     const index = TAP_ORDER.indexOf(status);
     for (let i = 1; i < TAP_ORDER.length; i++) {
         const candidate = TAP_ORDER[(index + i) % TAP_ORDER.length];
+        if (!allowFlash && candidate === 'flash') {
+            continue;
+        }
         if (BOULDER_STATUSES.indexOf(candidate) >= BOULDER_STATUSES.indexOf(minStatus)) {
             return candidate;
         }

@@ -92,6 +92,10 @@ export async function saveResult(
             return {ok: false, reason: 'harvest_fest_lower'};
         }
 
+        if (boulderStatus === 'flash' && (baseStatus === 'zone' || baseStatus === 'top')) {
+            return {ok: false, reason: 'harvest_fest_flash'};
+        }
+
         if (!change && boulderStatus !== baseStatus) {
             const changesCount = await db.$count(
                 harvestFestChange,
@@ -113,7 +117,21 @@ export async function saveResult(
                     competitorId: competitor.id,
                     boulderId: boulder.id,
                     previousStatus: baseStatus
-                });
+                })
+                .onConflictDoNothing();
+
+            const changesAfterInsert = await db.$count(
+                harvestFestChange,
+                eq(harvestFestChange.competitorId, competitor.id)
+            );
+
+            if (changesAfterInsert > HARVEST_FEST_CHANGE_LIMIT) {
+                await db.delete(harvestFestChange).where(and(
+                    eq(harvestFestChange.competitorId, competitor.id),
+                    eq(harvestFestChange.boulderId, boulder.id)
+                ));
+                return {ok: false, reason: 'harvest_fest_limit'};
+            }
         }
     }
 
