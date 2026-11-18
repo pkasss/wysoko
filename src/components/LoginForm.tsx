@@ -14,7 +14,7 @@ import {Panel, panelClass} from "@/src/components/Panel";
 import {Input} from "@/src/components/ui/input";
 import {Button} from "@/src/components/ui/button";
 
-type LoginStatus = 'idle' | 'sending' | 'sent' | 'error';
+type LoginStatus = 'idle' | 'sending' | 'sent' | 'error' | 'rate_limited';
 
 export function LoginForm({
     callbackURL, linkExpired
@@ -39,7 +39,7 @@ export function LoginForm({
         });
 
         if (error) {
-            setStatus('error');
+            setStatus(error.status === 429 ? 'rate_limited' : 'error');
         } else {
             setStatus('sent');
         }
@@ -86,19 +86,25 @@ export function LoginForm({
             )}
             <form className={'flex flex-col gap-2 w-full max-w-sm'} onSubmit={handleSubmit}>
                 <FieldLabel htmlFor={"email"} className={'text-lg'}>
-                    podaj maila.
+                    Podaj maila.
                 </FieldLabel>
                 <Field>
                     <Input
                         id={"email"}
                         type={"email"}
+                        name={'email'}
+                        autoComplete={'email'}
+                        inputMode={'email'}
+                        autoCapitalize={'none'}
+                        autoCorrect={'off'}
+                        spellCheck={false}
                         required
                         placeholder={"example@mail.com"}
                         value={mail}
                         onChange={(e) => setMail(e.target.value)}
                     />
                     <FieldDescription className={'text-xs'}>
-                        użyj maila podanego przy zapisach na zawody.
+                        Użyj maila podanego przy zapisach na zawody.
                     </FieldDescription>
                 </Field>
                 <Button
@@ -113,7 +119,12 @@ export function LoginForm({
                 </Button>
                 {status === 'error' &&
                     <FieldError>
-                        nie udało się wysłać linku, spróbuj ponownie.
+                        Nie udało się wysłać linku, spróbuj ponownie.
+                    </FieldError>
+                }
+                {status === 'rate_limited' &&
+                    <FieldError>
+                        Za dużo prób. Spróbuj ponownie za minutę.
                     </FieldError>
                 }
             </form>

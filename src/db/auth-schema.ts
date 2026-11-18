@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, integer, bigint } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),
@@ -31,6 +31,13 @@ export const session = pgTable(
     },
     (table) => [index("session_userId_idx").on(table.userId)],
 );
+
+export const rateLimit = pgTable("rate_limit", {
+    id: text("id").primaryKey(),
+    key: text("key"),
+    count: integer("count"),
+    lastRequest: bigint("last_request", {mode: "number"}),
+});
 
 export const account = pgTable(
     "account",

@@ -51,5 +51,14 @@ export const auth = betterAuth({
             },
             expiresIn: 900
         })
-    ]
+    ],
+    rateLimit: {
+        enabled: true,
+        storage: 'database',
+        window: 60,
+        max: 100,
+        customRules: {
+            '/sign-in/magic-link': {window: 60, max: 20},
+        },
+    }
 });
