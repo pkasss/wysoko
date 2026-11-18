@@ -25,17 +25,17 @@ export type SaveResultCode =
     'harvest_fest_limit';
 
 export type SaveResultResponse = {ok: true} | {ok: false, reason: SaveResultCode};
-export const saveResultResponseMessage: Record<SaveResultCode, string> = {
-    invalid: 'Coś poszło nie tak.',
-    unauthorized: 'Zaloguj się ponownie.',
-    not_found: 'Coś poszło nie tak.',
-    not_competitor: 'Nie startujesz w tych zawodach.',
-    not_started: 'Grupa jeszcze nie wystartowała.',
-    closed: 'Minęło 20 minut od końca grupy.',
-    harvest_fest_lower: 'W grupie Dożynkowej nie można obniżyć wyniku',
-    harvest_fest_flash: 'Flesz był możliwy tylko za pierwszym razem ;)',
-    harvest_fest_limit: 'Limit 2 zmian w grupie Dożynkowej wykorzystany'
-}
+export const saveResultResponseMessage: Record<SaveResultCode, {title: string, description?: string}> = {
+    invalid: {title: 'Coś poszło nie tak', description: 'Odśwież stronę i spróbuj ponownie.'},
+    unauthorized: {title: 'Sesja wygasła', description: 'Zaloguj się ponownie.'},
+    not_found: {title: 'Coś poszło nie tak', description: 'Odśwież stronę i spróbuj ponownie.'},
+    not_competitor: {title: 'Brak dostępu', description: 'Nie startujesz w tych zawodach.'},
+    not_started: {title: 'Grupa jeszcze nie wystartowała'},
+    closed: {title: 'Wpisywanie zamknięte', description: `Minęło ${RESULT_ENTRY_MINUTES} minut od końca grupy.`},
+    harvest_fest_limit: {title: 'Limit zmian wykorzystany', description: 'W Grupie Dożynkowej można zmienić 2 bouldery.'},
+    harvest_fest_lower: {title: 'Nie można obniżyć wyniku', description: 'W Grupie Dożynkowej wynik można tylko poprawić.'},
+    harvest_fest_flash: {title: 'Flesz niedostępny', description: 'Ten boulder był już wcześniej próbowany.'},
+};
 
 export const statusFlags: Record<BoulderStatus, {isZone: boolean, isTop: boolean, isFlash: boolean}> = {
     'none': {isZone: false, isTop: false, isFlash: false},

@@ -1,5 +1,6 @@
 'use client';
 
+import {toast} from 'sonner';
 import {HARVEST_FEST_CHANGE_LIMIT, statusStyle} from "@/src/lib/boulders-state";
 import {
     type Boulder,
@@ -28,7 +29,6 @@ export function BouldersGrid({
 }) {
     const [lastTapped, setLastTapped] = useState<number | null>(null);
     const [tapCount, setTapCount] = useState(0);
-    const [errorCode, setErrorCode] = useState<SaveResultCode | null>(null)
     const [optimisticBoulders, setOptimisticBoulder] = useOptimistic(
         boulders,
         (current, changed: {boulderId: number; status: BoulderStatus}) => {
@@ -39,17 +39,22 @@ export function BouldersGrid({
     );
     const [, startTransition] = useTransition();
 
+    function showSaveError(code: SaveResultCode, duration: number = 5000) {
+        const {title, description} = saveResultResponseMessage[code];
+        toast.error(title, {description, duration});
+    }
+
     function handleClick(boulder: Boulder) {
         setLastTapped(boulder.id);
         setTapCount((count) => count + 1);
 
         const now = new Date().getTime();
         if (now < heatStartTime.getTime()) {
-            setErrorCode('not_started');
+            showSaveError('not_started', 3000);
             return;
         }
         if (now > heatEndTime.getTime() + CLOSING_TIME) {
-            setErrorCode('closed');
+            showSaveError('closed');
             return;
         }
         startTransition(async () => {
@@ -59,7 +64,9 @@ export function BouldersGrid({
             setOptimisticBoulder({boulderId: boulder.id, status: nextStatus});
 
             const response = await saveResult({competitorId, boulderId: boulder.id, boulderStatus: nextStatus});
-            setErrorCode(response.ok ? null : response.reason);
+            if (!response.ok) {
+                showSaveError(response.reason);
+            }
         });
     }
 
@@ -92,11 +99,6 @@ export function BouldersGrid({
                     </span>}
                 </p>
             )}
-            {errorCode && <p
-                className={'flex flex-col text-center rounded-xl border-2 border-black bg-[#ffd6e7] px-3 py-2'}
-            >
-                {saveResultResponseMessage[errorCode]}
-            </p>}
             <div className={"grid grid-cols-5 gap-2 pr-1 pb-1"}>
                 {optimisticBoulders.map((boulder) => (
                     <button

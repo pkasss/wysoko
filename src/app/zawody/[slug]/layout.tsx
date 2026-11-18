@@ -3,9 +3,9 @@ import Image from "next/image";
 import {auth} from "@/src/lib/auth";
 import {getCompetition} from "@/src/db/queries/competitions";
 import {headers} from "next/headers";
-import {ViewTransition} from "react";
 import {notFound} from "next/navigation";
 import {Panel} from "@/src/components/Panel";
+import {Toaster} from '@/src/components/ui/sonner';
 import {BottomNav} from "@/src/components/BottomNav";
 
 export default async function CompetitionLayout({
@@ -20,7 +20,7 @@ export default async function CompetitionLayout({
 
     const {slug} = await params;
 
-    const competition =  await getCompetition(slug);
+    const competition = await getCompetition(slug);
     if (!competition) {
         notFound();
     }
@@ -40,14 +40,29 @@ export default async function CompetitionLayout({
                     width={920}
                     height={644}
                     priority
-                    className={'h-20 w-auto'}
+                    className={'h-(--header-height) w-auto'}
                 />
             </div>
-                <Panel className={'w-fit px-3 py-1 text-lg uppercase'}>
-                    {competitionDate}
-                </Panel>
-                <Panel className={'text-7xl font-display'}>{competition.name}</Panel>
-                {children}
+            <Panel className={'w-fit px-3 py-1 text-lg uppercase'}>
+                {competitionDate}
+            </Panel>
+            <Panel className={'text-7xl font-display'}>{competition.name}</Panel>
+            <Toaster
+                position={'bottom-center'}
+                mobileOffset={{bottom: '7rem'}}
+                offset={{bottom: '7rem'}}
+                visibleToasts={3}
+                toastOptions={{
+                    classNames: {
+                        toast: 'rounded-2xl! border-2! border-black! bg-white! text-black! shadow-[4px_4px_0_#000]! font-sans! gap-3!',
+                        title: 'font-display! text-4xl! leading-none! tracking-wide!',
+                        description: 'text-xl! text-black/70!',
+                        error: 'bg-[#ffd6e7]!',
+                        icon: 'text-black! text-xl!',
+                    },
+                }}
+            />
+            {children}
             {session && (
                 <BottomNav slug={slug}/>
             )}

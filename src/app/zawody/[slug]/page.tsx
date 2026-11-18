@@ -165,34 +165,35 @@ export default async function CompetitionRanking({
                         </Link>
                     ))}
                 </nav>
-                {leaderboard.length === 0 ? (
-                    <p>brak wyników.</p>
-                ) : (
-                    <table className={'w-full text-sm'}>
-                        <thead className={`sticky top-[calc(env(safe-area-inset-top)+var(--header-height)+1.5rem)] 
+                <div key={leaderboardType} className={'w-full motion-safe:animate-in motion-safe:fade-in duration-1000'}>
+                    {leaderboard.length === 0 ? (
+                        <p className={'text-center'}>brak wyników.</p>
+                    ) : (
+                        <table className={'w-full text-sm'}>
+                            <thead className={`sticky top-[calc(env(safe-area-inset-top)+var(--header-height)+1.5rem)] 
                                            z-10 text-xs text-left uppercase tracking-wide`}>
-                        <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
+                            <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
                                         *:last:rounded-r-full *:last:pr-4 
                                         *:shadow-[inset_0_2px_0_#000,inset_0_-2px_0_#000,4px_4px_0_#000]`}>
-                            <th scope={'col'} className={'w-10'}>#</th>
-                            <th scope={'col'}>Zawodnik</th>
-                            <th scope={'col'} className={'text-right'}>Pkt</th>
-                            <th scope={'col'} className={'text-right'}>Fl.</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {rows.map((row, index) => {
-                            const isNewLevel = row.level && row.level !== rows[index - 1]?.level;
+                                <th scope={'col'} className={'w-10'}>#</th>
+                                <th scope={'col'}>Zawodnik</th>
+                                <th scope={'col'} className={'text-right'}>Pkt</th>
+                                <th scope={'col'} className={'text-right'}>Fl.</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {rows.map((row, index) => {
+                                const isNewLevel = row.level && row.level !== rows[index - 1]?.level;
 
-                            return (
-                                <Fragment key={row.competitorId}>
-                                    {isNewLevel && row.level && (
-                                        <tr>
-                                            <th
-                                                colSpan={4}
-                                                scope={'rowgroup'}
-                                                className={cn('pb-2', index === 0 ? 'pt-2' : 'pt-6')}
-                                            >
+                                return (
+                                    <Fragment key={row.competitorId}>
+                                        {isNewLevel && row.level && (
+                                            <tr>
+                                                <th
+                                                    colSpan={4}
+                                                    scope={'rowgroup'}
+                                                    className={cn('pb-2', index === 0 ? 'pt-2' : 'pt-6')}
+                                                >
                                                 <span
                                                     className={cn(
                                                         `inline-block rounded-lg border-2 
@@ -203,30 +204,31 @@ export default async function CompetitionRanking({
                                                 >
                                                     {row.level}
                                                 </span>
-                                            </th>
+                                                </th>
+                                            </tr>
+                                        )}
+                                        <tr
+                                            className={cn(
+                                                '*:py-2.5 border-t border-black/10',
+                                                row.level && levelStyle[row.level],
+                                                myCompetitorsIds.has(row.competitorId) &&
+                                                'bg-black text-white border-2 border-black')}
+                                        >
+                                            <td className={'pl-2 font-display text-2xl'}>{row.place}</td>
+                                            <td className={'font-semibold'}>
+                                                {row.name}
+                                                {row.isFinalist && <span className={'px-3'}>🏁</span>}
+                                            </td>
+                                            <td className={'tabular-nums text-center'}>{row.pointsSum}</td>
+                                            <td className={'pr-2 tabular-nums text-center'}>{row.flashCount}</td>
                                         </tr>
-                                    )}
-                                    <tr
-                                        className={cn(
-                                            '*:py-2.5 border-t border-black/10',
-                                            row.level && levelStyle[row.level],
-                                            myCompetitorsIds.has(row.competitorId) &&
-                                            'bg-black text-white border-2 border-black')}
-                                    >
-                                        <td className={'pl-2 font-display text-2xl'}>{row.place}</td>
-                                        <td className={'font-semibold'}>
-                                            {row.name}
-                                            {row.isFinalist && <span className={'px-3'}>🏁</span>}
-                                        </td>
-                                        <td className={'tabular-nums text-center'}>{row.pointsSum}</td>
-                                        <td className={'pr-2 tabular-nums text-center'}>{row.flashCount}</td>
-                                    </tr>
-                                </Fragment>
-                            )
-                        })}
-                        </tbody>
-                    </table>
-                )}
+                                    </Fragment>
+                                )
+                            })}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
             </Panel>
         </>
     )
