@@ -270,8 +270,16 @@ async function seedTestCompetition() {
 }
 
 async function main() {
+    const host = new URL(process.env.DATABASE_URL ?? '').host;
+
+    if (process.env.SEED_CONFIRM !== host) {
+        throw new Error(
+            `Seed czyści CAŁĄ bazę ${host}. Jeśli na pewno chcesz, uruchom z SEED_CONFIRM=${host}`
+        );
+    }
+
     await db.execute(
-        sql`truncate table result, competitor, heat, boulder, competition, session, account, verification, "user" restart identity`,
+        sql`truncate table result, competitor, heat, harvest_fest_change, boulder, competition, session, account, rate_limit, verification, "user" restart identity`,
     );
 
     const formatTime = (date: Date) => date.toLocaleString('pl-PL', {timeZone: 'Europe/Warsaw'});
