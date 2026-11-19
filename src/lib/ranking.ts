@@ -1,4 +1,5 @@
 import type {Category, Gender} from "@/src/db/schema";
+import {CLOSING_TIME} from "@/src/lib/boulders-state";
 
 export const LEADERBOARD_TYPES = ['adult-m', 'adult-k', 'kids-m', 'kids-k'] as const;
 export type LeaderboardType = typeof LEADERBOARD_TYPES[number];
@@ -47,4 +48,12 @@ export const FINALISTS_PER_LEVEL: Record<Level, number> = {
     'GOD MODE': 8,
     'HELLRAISER': 4,
     'ROOKIE': 4
+}
+
+export function areResultsHidden(harvestHeat: {startTime: Date, endTime: Date} | undefined): boolean {
+    const now = new Date().getTime();
+
+    return harvestHeat !== undefined
+        && now >= harvestHeat.startTime.getTime()
+        && now < harvestHeat.endTime.getTime() + CLOSING_TIME;
 }

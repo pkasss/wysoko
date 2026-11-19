@@ -1,22 +1,23 @@
 'use server';
 
 import {harvestFestChange, result} from "@/src/db/schema";
+import {getAllHeats} from "@/src/db/queries/heats";
 import {auth} from "@/src/lib/auth";
 import {db} from "@/src/db";
 
 import {
+    statusFlags,
     BOULDER_STATUSES,
-    CLOSING_TIME, getBoulderStatus, HARVEST_FEST_CHANGE_LIMIT,
-    isBoulderStatus, RESULT_REVEAL_DELAY,
-    SaveResultResponse,
-    statusFlags
+    CLOSING_TIME, HARVEST_FEST_CHANGE_LIMIT,
+    isBoulderStatus, getBoulderStatus,
+    SaveResultResponse
 } from "@/src/lib/boulders-state";
+
 import {getCompetitor} from "@/src/db/queries/competitors";
 import {getBoulder} from "@/src/db/queries/boulders";
 import {revalidatePath} from "next/cache";
 import {headers} from "next/headers";
 import {and, eq} from "drizzle-orm";
-import {getAllHeats} from "@/src/db/queries/heats";
 
 type SaveResultParams = {competitorId: number, boulderId: number, boulderStatus: string}
 

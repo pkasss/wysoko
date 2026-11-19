@@ -9,7 +9,7 @@ import {
     LEADERBOARD_TYPES,
     levelStyle,
     isLeaderboardType, getLevel,
-    LeaderboardType, Level, FINALISTS_PER_LEVEL
+    LeaderboardType, Level, FINALISTS_PER_LEVEL, areResultsHidden
 } from "@/src/lib/ranking";
 import {Category, Gender} from "@/src/db/schema";
 import {Fragment} from "react";
@@ -22,6 +22,7 @@ import {getCompetitors} from "@/src/db/queries/competitors";
 import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {RankingSummary} from "@/src/components/RankingSummary";
 import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
+import {LeaderboardRow} from "@/src/components/LeaderboardRow";
 
 function pickLeaderboard({ranking, zawodnik, competitors}: {
     ranking: string | undefined;
@@ -73,13 +74,7 @@ export default async function CompetitionRanking({
     const allHeats = await getAllHeats(competition.id);
     const harvestFestHeat = allHeats.find((heat) => heat.type === 'harvestFest');
 
-    const now = new Date();
-
-    const resultsHidden = harvestFestHeat !== undefined
-        && now.getTime() >= harvestFestHeat.startTime.getTime()
-        && now.getTime() < harvestFestHeat.endTime.getTime() + CLOSING_TIME;
-
-    if (resultsHidden) {
+    if (harvestFestHeat && areResultsHidden(harvestFestHeat)) {
         const revealTime = new Date(harvestFestHeat.endTime.getTime() + CLOSING_TIME);
 
         return (
@@ -207,21 +202,15 @@ export default async function CompetitionRanking({
                                                 </th>
                                             </tr>
                                         )}
-                                        <tr
+                                        <LeaderboardRow
+                                            row={row}
                                             className={cn(
                                                 '*:py-2.5 border-t border-black/10',
                                                 row.level && levelStyle[row.level],
                                                 myCompetitorsIds.has(row.competitorId) &&
-                                                'bg-black text-white border-2 border-black')}
-                                        >
-                                            <td className={'pl-2 font-display text-2xl'}>{row.place}</td>
-                                            <td className={'font-semibold'}>
-                                                {row.name}
-                                                {row.isFinalist && <span className={'px-3'}>🏁</span>}
-                                            </td>
-                                            <td className={'tabular-nums text-center'}>{row.pointsSum}</td>
-                                            <td className={'pr-2 tabular-nums text-center'}>{row.flashCount}</td>
-                                        </tr>
+                                                'bg-black text-white border-2 border-black'
+                                            )}
+                                        />
                                     </Fragment>
                                 )
                             })}

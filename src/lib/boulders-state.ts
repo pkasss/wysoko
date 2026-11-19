@@ -8,6 +8,9 @@ export const HARVEST_FEST_CHANGE_LIMIT = 2;
 export type Boulders = Awaited<ReturnType<typeof getBouldersWithResults>>;
 export type Boulder = Boulders[number];
 
+export type CompetitorBoulder = {id: number, number: number, grade: number, status: BoulderStatus};
+export type CompetitorBouldersResponse = {ok: true, boulders: CompetitorBoulder[]} | {ok: false};
+
 export const BOULDER_STATUSES = ['none', 'zone', 'top', 'flash'] as const;
 export type BoulderStatus = typeof BOULDER_STATUSES[number];
 
