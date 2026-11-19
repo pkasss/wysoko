@@ -1,4 +1,5 @@
 import {ReactNode} from "react";
+import {Metadata} from "next";
 
 import {BoulderStatus, CLOSING_TIME, getBoulderStatus} from "@/src/lib/boulders-state";
 import {getCompetition} from "@/src/db/queries/competitions";
@@ -17,6 +18,10 @@ import {getCompetitors} from "@/src/db/queries/competitors";
 import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
 import {SignOutButton} from "@/src/components/SignOutButton";
 import {getBouldersWithResults} from "@/src/db/queries/boulders";
+
+export const metadata: Metadata = {
+    title: 'Wyniki'
+};
 
 
 export default async function CompetitionResults({

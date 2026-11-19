@@ -4,13 +4,18 @@ import {getAllHeats} from "@/src/db/queries/heats";
 import {CLOSING_TIME} from "@/src/lib/boulders-state";
 import {getCompetition} from "@/src/db/queries/competitions";
 import {
+    areResultsHidden,
     DEFAULT_LEADERBOARD,
-    LEADERBOARDS,
+    FINALISTS_PER_LEVEL,
+    getLevel,
+    isLeaderboardType,
     LEADERBOARD_TYPES,
-    levelStyle,
-    isLeaderboardType, getLevel,
-    LeaderboardType, Level, FINALISTS_PER_LEVEL, areResultsHidden
+    LEADERBOARDS,
+    LeaderboardType,
+    Level,
+    levelStyle
 } from "@/src/lib/ranking";
+import type {Metadata} from 'next';
 import {Category, Gender} from "@/src/db/schema";
 import {Fragment} from "react";
 import {cn} from "@/src/lib/utils";
@@ -23,6 +28,10 @@ import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {RankingSummary} from "@/src/components/RankingSummary";
 import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
 import {LeaderboardRow} from "@/src/components/LeaderboardRow";
+
+export const metadata: Metadata = {
+    title: 'Ranking',
+};
 
 function pickLeaderboard({ranking, zawodnik, competitors}: {
     ranking: string | undefined;

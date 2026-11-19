@@ -1,8 +1,13 @@
+import {Metadata} from "next";
 import {statusStyle} from "@/src/lib/boulders-state";
 import {enterClass, Panel} from "@/src/components/Panel";
 import {HeatSchedule} from "@/src/components/HeatSchedule";
 import {StatTile} from "@/src/components/StatTile";
 import {cn} from "@/src/lib/utils";
+
+export const metadata: Metadata = {
+    title: 'Info'
+};
 
 export default async function Info({params}: {params: {slug: string}}) {
 
