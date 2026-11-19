@@ -44,6 +44,12 @@ export const levelStyle: Record<Level, string> = {
     'ROOKIE': 'bg-white',
 };
 
+export const levelRowStyle: Record<Level, string> = {
+    'GOD MODE': '*:bg-[#ff3d8f]',
+    'HELLRAISER': '*:bg-[#ffd6e7]',
+    'ROOKIE': '*:bg-white',
+};
+
 export const FINALISTS_PER_LEVEL: Record<Level, number> = {
     'GOD MODE': 8,
     'HELLRAISER': 4,

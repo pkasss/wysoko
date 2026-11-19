@@ -12,7 +12,7 @@ import {
     LEADERBOARD_TYPES,
     LEADERBOARDS,
     LeaderboardType,
-    Level,
+    Level, levelRowStyle,
     levelStyle
 } from "@/src/lib/ranking";
 import type {Metadata} from 'next';
@@ -173,7 +173,7 @@ export default async function CompetitionRanking({
                     {leaderboard.length === 0 ? (
                         <p className={'text-center'}>brak wyników.</p>
                     ) : (
-                        <table className={'w-full text-sm'}>
+                        <table className={'w-full text-sm border-separate border-spacing-y-1'}>
                             <thead className={`sticky top-[calc(env(safe-area-inset-top)+var(--header-height)+1.5rem)] 
                                            z-10 text-xs text-left uppercase tracking-wide`}>
                             <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
@@ -214,10 +214,9 @@ export default async function CompetitionRanking({
                                         <LeaderboardRow
                                             row={row}
                                             className={cn(
-                                                '*:py-2.5 border-t border-black/10',
-                                                row.level && levelStyle[row.level],
-                                                myCompetitorsIds.has(row.competitorId) &&
-                                                'bg-black text-white border-2 border-black'
+                                                '*:py-2.5 *:first:rounded-l-lg *:last:rounded-r-lg',
+                                                row.level && levelRowStyle[row.level],
+                                                myCompetitorsIds.has(row.competitorId) && '*:bg-[#ff3d8f] text-black'
                                             )}
                                         />
                                     </Fragment>

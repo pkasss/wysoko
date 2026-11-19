@@ -32,12 +32,11 @@ export function LeaderboardRow({
 
     return (
         <Fragment>
-            <tr className={className}>
+            <tr className={className} onClick={toggle}>
                 <td className={'pl-2 font-display text-2xl'}>{row.place}</td>
                 <td className={'font-semibold'}>
                     <button
                         type={'button'}
-                        onClick={toggle}
                         aria-expanded={open}
                         aria-controls={panelId}
                         className={'text-left'}
