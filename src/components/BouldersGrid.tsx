@@ -87,7 +87,7 @@ export function BouldersGrid({
                     Twoje bouldery.
                 </span>
                 <span className={'text-xl'}>
-                    {toppedBoulders.length}/{boulders.length}
+                    {toppedBoulders.length}/{boulders.length} topów.
                 </span>
             </div>
             <StatusLegend/>

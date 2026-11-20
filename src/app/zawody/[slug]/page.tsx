@@ -216,7 +216,7 @@ export default async function CompetitionRanking({
                                             className={cn(
                                                 '*:py-2.5 *:first:rounded-l-lg *:last:rounded-r-lg',
                                                 row.level && levelRowStyle[row.level],
-                                                myCompetitorsIds.has(row.competitorId) && '*:bg-[#ff3d8f] text-black'
+                                                myCompetitorsIds.has(row.competitorId) && '*:bg-black text-white'
                                             )}
                                         />
                                     </Fragment>

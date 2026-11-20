@@ -48,6 +48,7 @@
 }
 
 :root {
+  color-scheme: only light;
   --header-height: 5rem;
   --background: whitesmoke;
   --foreground: oklch(0.145 0 0);
