@@ -50,8 +50,8 @@ export const statusFlags: Record<BoulderStatus, {isZone: boolean, isTop: boolean
 export type BouldersStyle = {label: string, className: string}
 export const statusStyle: Record<BoulderStatus, BouldersStyle> = {
     none: {label: 'Brak wyniku', className: 'bg-white text-black'},
-    zone: {label: 'Zona', className: 'bg-[#ffd6e7] text-black'},
-    top: {label: 'Top', className: 'bg-[#ff3d8f] text-black'},
+    zone: {label: 'Zona', className: 'bg-zone text-on-zone'},
+    top: {label: 'Top', className: 'bg-top text-on-top'},
     flash: {label: 'Flesz', className: 'bg-black text-white'},
 };
 

@@ -32,7 +32,7 @@ export default async function CompetitionLayout({
         <main className={'flex flex-col gap-3 mx-auto max-w-xl px-4 pt-2 pb-28'}>
             <div
                 style={{viewTransitionName: 'site-header'}}
-                className={`sticky top-0 z-20 -mx-4 flex justify-center bg-[whitesmoke]/90 px-4
+                className={`sticky top-0 z-20 -mx-4 flex justify-center bg-background/90 px-4
                              pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 backdrop-blur`}>
                 <Image
                     src={'/avatar-logo-full.svg'}
@@ -40,7 +40,7 @@ export default async function CompetitionLayout({
                     width={920}
                     height={644}
                     priority
-                    className={'h-(--header-height) w-auto'}
+                    className={'h-(--header-height) w-auto dark:invert'}
                 />
             </div>
             <Panel className={'w-fit px-3 py-1 text-lg uppercase'}>
@@ -54,10 +54,10 @@ export default async function CompetitionLayout({
                 visibleToasts={3}
                 toastOptions={{
                     classNames: {
-                        toast: 'rounded-2xl! border-2! border-black! bg-white! text-black! shadow-[4px_4px_0_#000]! font-sans! gap-3!',
+                        toast: 'rounded-2xl! border-2! border-black! bg-white! text-black! shadow-[4px_4px_0_var(--color-black)]! font-sans! gap-3!',
                         title: 'font-display! text-4xl! leading-none! tracking-wide!',
                         description: 'text-xl! text-black/70!',
-                        error: 'bg-[#ffd6e7]!',
+                        error: 'bg-zone! text-on-zone!',
                         icon: 'text-black! text-xl!',
                     },
                 }}

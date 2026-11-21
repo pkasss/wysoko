@@ -39,14 +39,14 @@ export function getLevel(beaten: number, total: number) {
 export type Level = typeof LEVELS[number]['name'];
 
 export const levelStyle: Record<Level, string> = {
-    'GOD MODE': 'bg-[#ff3d8f]',
-    'HELLRAISER': 'bg-[#ffd6e7]',
+    'GOD MODE': 'bg-top text-on-top',
+    'HELLRAISER': 'bg-zone text-on-zone',
     'ROOKIE': 'bg-white',
 };
 
 export const levelRowStyle: Record<Level, string> = {
-    'GOD MODE': '*:bg-[#ff3d8f]',
-    'HELLRAISER': '*:bg-[#ffd6e7]',
+    'GOD MODE': '*:bg-top text-on-top',
+    'HELLRAISER': '*:bg-zone text-on-zone',
     'ROOKIE': '*:bg-white',
 };
 

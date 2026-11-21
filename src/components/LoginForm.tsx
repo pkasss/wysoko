@@ -79,7 +79,7 @@ export function LoginForm({
             <h1 className={'font-display text-6xl pb-4'}>Zaloguj się</h1>
             {linkExpired && (
                 <p
-                    className={'rounded-xl border-2 border-black bg-[#ffd6e7] px-3 py-2 text-sm'}
+                    className={'rounded-xl border-2 border-black bg-zone text-on-zone px-3 py-2 text-sm'}
                 >
                     Ten link został już użyty albo wygasł. Wpisz maila, wyślemy nowy.
                 </p>
@@ -111,7 +111,7 @@ export function LoginForm({
                     type={"submit"}
                     variant={"outline"}
                     disabled={status === 'sending'}
-                    className={cn(`m-3 h-auto font-display text-2xl active:bg-[#ff3d8f] 
+                    className={cn(`m-3 h-auto font-display text-2xl active:bg-top active:text-on-top 
                                    active:translate-x-0.75 active:translate-y-0.75 
                                    active:shadow-none`, panelClass)}
                 >

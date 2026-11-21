@@ -9,8 +9,11 @@ const inter = Inter({subsets: ['latin', 'latin-ext'], variable: '--font-inter'})
 
 export const viewport: Viewport = {
     viewportFit: 'cover',
-    themeColor: '#f5f5f5',
-    colorScheme: "only light"
+    themeColor: [
+        {media: '(prefers-color-scheme: light)', color: '#f5f5f5'},
+        {media: '(prefers-color-scheme: dark)', color: '#0f0f10'},
+    ],
+    colorScheme: 'light dark'
 };
 
 export const metadata: Metadata = {

@@ -110,12 +110,12 @@ export function BouldersGrid({
                             baseline?.[boulder.id] === 'flash' ||
                             baseline?.[boulder.id] === 'top'
                         }
-                        className={cn(`border-2 border-black shadow-[3px_3px_0_#000] rounded-xl h-16 
+                        className={cn(`border-2 border-black shadow-[3px_3px_0_var(--color-black)] rounded-xl h-16 
                                        active:translate-x-0.75 active:translate-y-0.75 active:shadow-none 
                                        transition-transform duration-300 disabled:opacity-30 disabled:shadow-none`,
                                        statusStyle[getBoulderStatus(boulder)].className,
                                        changedIds.has(boulder.id) && `-translate-x-0.5 -translate-y-0.5 
-                                       shadow-[5px_5px_0_#000] border-4`)
+                                       shadow-[5px_5px_0_var(--color-black)] border-4`)
 
                         }
                     >

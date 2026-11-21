@@ -181,7 +181,7 @@ export default async function CompetitionRanking({
                                            z-10 text-xs text-left uppercase tracking-wide`}>
                                 <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
                                         *:last:rounded-r-full *:last:pr-4 
-                                        *:shadow-[inset_0_2px_0_#000,inset_0_-2px_0_#000,4px_4px_0_#000]`}>
+                                        *:shadow-[inset_0_2px_0_var(--color-black),inset_0_-2px_0_var(--color-black),4px_4px_0_var(--color-black)]`}>
                                     <th scope={'col'} className={'w-10'}>#</th>
                                     <th scope={'col'}>Zawodnik</th>
                                     <th scope={'col'} className={'text-right'}>Pkt</th>
@@ -205,7 +205,7 @@ export default async function CompetitionRanking({
                                                     className={cn(
                                                         `inline-block rounded-lg border-2 
                                                         border-black px-3 pt-1 font-display 
-                                                        text-3xl leading-none shadow-[2px_2px_0_#000]`,
+                                                        text-3xl leading-none shadow-[2px_2px_0_var(--color-black)]`,
                                                         levelStyle[row.level]
                                                     )}
                                                 >
