@@ -174,7 +174,7 @@ export default async function CompetitionRanking({
                     {leaderboard.length === 0 ? (
                         <p className={'text-center'}>brak wyników.</p>
                     ) : (
-                        <div className={'flex flex-col gap-2'}>
+                        <div className={'flex flex-col items-center gap-2'}>
                             <StatusLegend/>
                             <table className={'w-full text-sm border-separate border-spacing-y-1'}>
                                 <thead className={`sticky top-[calc(env(safe-area-inset-top)+var(--header-height)+1.5rem)] 
