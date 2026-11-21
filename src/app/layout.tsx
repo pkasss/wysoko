@@ -1,6 +1,7 @@
 import "./globals.css";
 import {cn} from "@/src/lib/utils";
 import {Inter, Bebas_Neue} from "next/font/google";
+import { Analytics } from "@vercel/analytics/next"
 import type {Metadata, Viewport} from "next";
 
 const bebas = Bebas_Neue({weight: '400', subsets: ['latin', 'latin-ext'], variable: '--font-bebas'});
@@ -25,6 +26,7 @@ export default function RootLayout({children}: LayoutProps<"/">) {
                 "h-full", "antialiased",
                 inter.variable, bebas.variable)}
         >
+        <Analytics/>
         <body className="min-h-full flex flex-col touch-manipulation">{children}</body>
         </html>
     );
