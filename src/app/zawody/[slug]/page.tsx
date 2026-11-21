@@ -28,6 +28,7 @@ import {getLeaderboard} from "@/src/db/queries/leaderboard";
 import {RankingSummary} from "@/src/components/RankingSummary";
 import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
 import {LeaderboardRow} from "@/src/components/LeaderboardRow";
+import {StatusLegend} from "@/src/components/StatusLegend";
 
 export const metadata: Metadata = {
     title: 'Ranking',
@@ -173,31 +174,33 @@ export default async function CompetitionRanking({
                     {leaderboard.length === 0 ? (
                         <p className={'text-center'}>brak wyników.</p>
                     ) : (
-                        <table className={'w-full text-sm border-separate border-spacing-y-1'}>
-                            <thead className={`sticky top-[calc(env(safe-area-inset-top)+var(--header-height)+1.5rem)] 
+                        <div className={'flex flex-col gap-2'}>
+                            <StatusLegend/>
+                            <table className={'w-full text-sm border-separate border-spacing-y-1'}>
+                                <thead className={`sticky top-[calc(env(safe-area-inset-top)+var(--header-height)+1.5rem)] 
                                            z-10 text-xs text-left uppercase tracking-wide`}>
-                            <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
+                                <tr className={`*:bg-white *:py-2 *:first:rounded-l-full *:first:pl-4 
                                         *:last:rounded-r-full *:last:pr-4 
                                         *:shadow-[inset_0_2px_0_#000,inset_0_-2px_0_#000,4px_4px_0_#000]`}>
-                                <th scope={'col'} className={'w-10'}>#</th>
-                                <th scope={'col'}>Zawodnik</th>
-                                <th scope={'col'} className={'text-right'}>Pkt</th>
-                                <th scope={'col'} className={'text-right'}>Fl.</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {rows.map((row, index) => {
-                                const isNewLevel = row.level && row.level !== rows[index - 1]?.level;
+                                    <th scope={'col'} className={'w-10'}>#</th>
+                                    <th scope={'col'}>Zawodnik</th>
+                                    <th scope={'col'} className={'text-right'}>Pkt</th>
+                                    <th scope={'col'} className={'text-right'}>Fl.</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {rows.map((row, index) => {
+                                    const isNewLevel = row.level && row.level !== rows[index - 1]?.level;
 
-                                return (
-                                    <Fragment key={row.competitorId}>
-                                        {isNewLevel && row.level && (
-                                            <tr>
-                                                <th
-                                                    colSpan={4}
-                                                    scope={'rowgroup'}
-                                                    className={cn('pb-2', index === 0 ? 'pt-2' : 'pt-6')}
-                                                >
+                                    return (
+                                        <Fragment key={row.competitorId}>
+                                            {isNewLevel && row.level && (
+                                                <tr>
+                                                    <th
+                                                        colSpan={4}
+                                                        scope={'rowgroup'}
+                                                        className={cn('pb-2', index === 0 ? 'pt-2' : 'pt-6')}
+                                                    >
                                                 <span
                                                     className={cn(
                                                         `inline-block rounded-lg border-2 
@@ -208,22 +211,23 @@ export default async function CompetitionRanking({
                                                 >
                                                     {row.level}
                                                 </span>
-                                                </th>
-                                            </tr>
-                                        )}
-                                        <LeaderboardRow
-                                            row={row}
-                                            className={cn(
-                                                '*:py-2.5 *:first:rounded-l-lg *:last:rounded-r-lg',
-                                                row.level && levelRowStyle[row.level],
-                                                myCompetitorsIds.has(row.competitorId) && '*:bg-black text-white'
+                                                    </th>
+                                                </tr>
                                             )}
-                                        />
-                                    </Fragment>
-                                )
-                            })}
-                            </tbody>
-                        </table>
+                                            <LeaderboardRow
+                                                row={row}
+                                                className={cn(
+                                                    '*:py-2.5 *:first:rounded-l-lg *:last:rounded-r-lg',
+                                                    row.level && levelRowStyle[row.level],
+                                                    myCompetitorsIds.has(row.competitorId) && '*:bg-black text-white'
+                                                )}
+                                            />
+                                        </Fragment>
+                                    )
+                                })}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
                 </div>
             </Panel>

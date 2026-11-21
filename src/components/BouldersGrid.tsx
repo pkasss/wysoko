@@ -90,7 +90,7 @@ export function BouldersGrid({
                     {toppedBoulders.length}/{boulders.length} topów.
                 </span>
             </div>
-            <StatusLegend/>
+            <StatusLegend description={'Stuknij kafelek, aby zmienić wynik.'}/>
             {baseline && (
                 <p>
                     Zmiany w grupie Dożynkowej: {changedIds.size}/{HARVEST_FEST_CHANGE_LIMIT}{' '}
