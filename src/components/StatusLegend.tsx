@@ -1,9 +1,9 @@
 import {BOULDER_STATUSES, statusStyle} from "@/src/lib/boulders-state";
 import {cn} from "@/src/lib/utils";
 
-export function StatusLegend({description}: {description?: string}) {
+export function StatusLegend({description, className}: {description?: string, className?: string}) {
     return (
-        <div className={'flex flex-wrap items-center text-sm gap-x-3 gap-y-1.5'}>
+        <div className={cn(className, 'flex flex-wrap items-center text-sm gap-x-3 gap-y-1.5')}>
             {BOULDER_STATUSES.map(status => (
                 <span key={status} className={'flex items-center gap-x-1.5 font-heading'}>
                     <span className={cn('size-5 border-2 border-black rounded-sm', statusStyle[status].className)}>
