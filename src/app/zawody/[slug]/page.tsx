@@ -29,6 +29,7 @@ import {RankingSummary} from "@/src/components/RankingSummary";
 import {enterClass, Panel, pressableClass} from "@/src/components/Panel";
 import {LeaderboardRow} from "@/src/components/LeaderboardRow";
 import {StatusLegend} from "@/src/components/StatusLegend";
+import {LogInButton} from "@/src/components/LogInButton";
 
 export const metadata: Metadata = {
     title: 'Ranking',
@@ -90,12 +91,7 @@ export default async function CompetitionRanking({
         return (
             <>
                 {!session && (
-                    <Link
-                        href={`/login?next=/zawody/${competition.slug}/wyniki`}
-                        className={cn(enterClass, pressableClass, 'delay-100 text-center text-4xl block')}
-                    >
-                        Startujesz? Zaloguj się!
-                    </Link>
+                    <LogInButton competitionSlug={competition.slug}/>
                 )}
                 <Panel className={cn(enterClass, 'delay-100 flex flex-col text-center')}>
                     <h2 className={'text-xl'}>
@@ -148,12 +144,7 @@ export default async function CompetitionRanking({
         <>
             <AutoRefresh/>
             {!session && (
-                <Link
-                    href={`/login?next=/zawody/${competition.slug}/wyniki`}
-                    className={cn(enterClass, pressableClass, 'delay-100 text-center text-4xl block')}
-                >
-                    Startujesz? Zaloguj się!
-                </Link>
+                <LogInButton competitionSlug={competition.slug}/>
             )}
             {myRows.map((row) => (
                 <Panel key={row.competitorId} className={cn(enterClass, 'delay-100')}>

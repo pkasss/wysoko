@@ -2,7 +2,6 @@ import type {getBouldersWithResults} from "@/src/db/queries/boulders";
 
 export const RESULT_ENTRY_MINUTES = 20;
 export const CLOSING_TIME = RESULT_ENTRY_MINUTES * 60 * 1000;
-export const RESULT_REVEAL_DELAY = 15 * 60 * 1000;
 export const HARVEST_FEST_CHANGE_LIMIT = 2;
 
 export type Boulders = Awaited<ReturnType<typeof getBouldersWithResults>>;

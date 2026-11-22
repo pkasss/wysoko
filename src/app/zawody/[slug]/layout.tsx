@@ -47,6 +47,10 @@ export default async function CompetitionLayout({
                 {competitionDate}
             </Panel>
             <Panel className={'text-7xl font-display'}>{competition.name}</Panel>
+            {children}
+            {session && (
+                <BottomNav slug={slug}/>
+            )}
             <Toaster
                 position={'bottom-center'}
                 mobileOffset={{bottom: '7rem'}}
@@ -62,10 +66,6 @@ export default async function CompetitionLayout({
                     },
                 }}
             />
-            {children}
-            {session && (
-                <BottomNav slug={slug}/>
-            )}
         </main>
     );
 }
