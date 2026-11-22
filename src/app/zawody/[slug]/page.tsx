@@ -88,17 +88,27 @@ export default async function CompetitionRanking({
         const revealTime = new Date(harvestFestHeat.endTime.getTime() + CLOSING_TIME);
 
         return (
-            <Panel className={cn(enterClass, 'delay-100 flex flex-col text-center')}>
-                <h2 className={'text-xl'}>
-                    Trwa grupa <span className={'font-display text-4xl'}>dożynkowa</span>.
-                    Wyniki zostały ukryte.
-                </h2>
-                <Countdown
-                    steps={[{until: revealTime, label: 'Ranking wróci za:'}]}
-                    doneLabel={'Odśwież stronę, żeby zobaczyć wyniki.'}
-                    refreshOnDone
-                />
-            </Panel>
+            <>
+                {!session && (
+                    <Link
+                        href={`/login?next=/zawody/${competition.slug}/wyniki`}
+                        className={cn(enterClass, pressableClass, 'delay-100 text-center text-4xl block')}
+                    >
+                        Startujesz? Zaloguj się!
+                    </Link>
+                )}
+                <Panel className={cn(enterClass, 'delay-100 flex flex-col text-center')}>
+                    <h2 className={'text-xl'}>
+                        Trwa grupa <span className={'font-display text-4xl'}>dożynkowa</span>.
+                        Wyniki zostały ukryte.
+                    </h2>
+                    <Countdown
+                        steps={[{until: revealTime, label: 'Ranking wróci za:'}]}
+                        doneLabel={'Odśwież stronę, żeby zobaczyć wyniki.'}
+                        refreshOnDone
+                    />
+                </Panel>
+            </>
         );
     }
 
